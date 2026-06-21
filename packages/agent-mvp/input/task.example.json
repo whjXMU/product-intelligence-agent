@@ -1,0 +1,17 @@
+{
+  "rolePerspective": "站在 DeepSeek 产品经理角度",
+  "selfProduct": {
+    "name": "DeepSeek",
+    "htmlFile": "self.html"
+  },
+  "competitorProduct": {
+    "name": "OpenAI",
+    "htmlFile": "competitor.html"
+  },
+  "objective": "比较官网首页在产品表达、转化路径、能力展示、信任建设等方面的差异，并提出产品优化需求。",
+  "analysisPreferences": {
+    "language": "zh-CN",
+    "scoreScale": "1-10",
+    "requireEvidence": true
+  }
+}

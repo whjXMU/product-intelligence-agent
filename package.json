@@ -1,0 +1,25 @@
+{
+  "name": "ai-product-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "辅助产品经理进行 AI 产品文档竞品分析的 Agent 应用",
+  "packageManager": "pnpm@8.15.9",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:web": "pnpm --filter @ai-product-agent/web dev",
+    "dev:api": "pnpm --filter @ai-product-agent/api start:dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "agent:mvp": "pnpm --filter @ai-product-agent/agent-mvp start",
+    "agent:mvp:build": "pnpm --filter @ai-product-agent/agent-mvp build",
+    "agent:mvp:typecheck": "pnpm --filter @ai-product-agent/agent-mvp typecheck",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.6",
+    "typescript": "^5.8.3"
+  }
+}

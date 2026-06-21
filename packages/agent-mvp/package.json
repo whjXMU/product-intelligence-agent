@@ -1,0 +1,19 @@
+{
+  "name": "@ai-product-agent/agent-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent MVP：基于手动 HTML 输入的竞品首页分析实验包",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.3"
+  }
+}
