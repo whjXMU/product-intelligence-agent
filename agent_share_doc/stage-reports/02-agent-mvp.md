@@ -60,8 +60,8 @@ packages/agent-mvp/.env
 
 ## 验证记录
 
-- `pnpm -r list --depth -1`：已识别 `@ai-product-agent/agent-mvp`；
-- `pnpm --filter @ai-product-agent/agent-mvp typecheck`：未通过，原因是新 workspace 包尚未执行 `pnpm install`，本地 `node_modules` 链接未建立，导致 `@types/node` 无法解析。
+- `pnpm -r list --depth -1`：已识别 `@product-intelligence-agent/agent-mvp`；
+- `pnpm --filter @product-intelligence-agent/agent-mvp typecheck`：未通过，原因是新 workspace 包尚未执行 `pnpm install`，本地 `node_modules` 链接未建立，导致 `@types/node` 无法解析。
 - 开发者手动执行 `pnpm install` 后，`pnpm agent:mvp:typecheck` 已通过。
 - `pnpm agent:mvp:build` 已通过。
 - `pnpm agent:mvp` 已通过，提示待补充 `task.json` 和两个 HTML 文件。
@@ -87,6 +87,75 @@ packages/agent-mvp/.env
 - OpenAI 页面信息密度明显更高，报告中差距分析主要集中在场景表达、企业信任、商业化路径和生态表达；
 - 当前提取器仍是启发式规则，后续可以继续优化 navigation、首屏区域和 footer 噪声过滤；
 - 当前 LLM 分析已可用，但还没有实现失败重试、JSON 修复、成本统计和 eval 自动评分。
+
+## 稳定性优化记录
+
+- DeepSeek client 已支持超时和重试；
+- DeepSeek client 已记录 usage、model 和 attempts；
+- workflow 已输出 `llm-response-meta.json`；
+- 新增本地质量检查器，输出 `quality-check.json`；
+- 质量检查当前覆盖维度数量、需求数量、标准维度覆盖、证据完整性和成功指标；
+- HTML 正文抽取已优先使用 `main`，并在无 `main` 时过滤 `header/nav/footer`；
+- HTML 正文行已过滤备案、版权、协议等页脚噪声。
+
+## 最新验证
+
+- `pnpm agent:mvp:typecheck`：通过；
+- `pnpm agent:mvp:build`：通过；
+- `pnpm agent:mvp`：通过；
+- `quality-check.json`：passed 为 true；
+- 本次 LLM usage：prompt_tokens 3359，completion_tokens 7376，total_tokens 10735；
+- 本次 DeepSeek 调用 attempts：1。
+
+## JSON 修复与 Prompt 版本管理
+
+- DeepSeek client 已迁移为 OpenAI SDK 调用；
+- `packages/agent-mvp` 已声明 `openai` 依赖；
+- 新增 prompt 版本：`competitive-analysis.v1.1.0`；
+- workflow 已输出 `prompt-meta.json`；
+- 模型输出先执行 `JSON.parse + zod schema`；
+- 如果 JSON 或 schema 校验失败，会调用 DeepSeek 执行一次 JSON 修复；
+- 修复结果仍必须通过 `competitiveAnalysisReportSchema`；
+- 修复是否发生、修复 attempts、修复模型和 usage 会写入 `llm-response-meta.json`。
+
+## 最新验证：OpenAI SDK 迁移后
+
+- `pnpm agent:mvp:typecheck`：通过；
+- `pnpm agent:mvp:build`：通过；
+- `pnpm agent:mvp`：通过；
+- `prompt-meta.json` 已输出：`competitive-analysis.v1.1.0`；
+- `llm-response-meta.json` 已输出；
+- 本次 JSON 修复未触发：`repaired=false`；
+- 本次 DeepSeek 调用 attempts：1；
+- 本次 LLM usage：prompt_tokens 3257，completion_tokens 6062，total_tokens 9319；
+- `quality-check.json`：passed 为 true。
+
+## 项目命名对齐
+
+- 根项目名称已对齐为 `product-intelligence-agent`；
+- workspace 包名已从 `@ai-product-agent/*` 对齐为 `@product-intelligence-agent/*`；
+- 前后端共享包 import 已对齐为 `@product-intelligence-agent/shared`；
+- Docker PostgreSQL 容器名已对齐为 `product-intelligence-agent-postgres`；
+- README、docs、agent_share_doc 中旧项目名已替换。
+
+### 当前注意事项
+
+改 workspace package name 后，需要重新生成 pnpm workspace 软链。
+
+当前 `pnpm typecheck` 中 `apps/web` 和 `apps/api` 会因为本地 `node_modules` 仍是旧软链而暂时找不到 `@product-intelligence-agent/shared`。
+
+需要开发者在根目录手动执行：
+
+```bash
+pnpm install
+```
+
+之后再验证：
+
+```bash
+pnpm typecheck
+pnpm build
+```
 
 ## 当前阻塞
 

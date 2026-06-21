@@ -1,6 +1,6 @@
-# AI 产品文档竞品分析 Agent
+# product-intelligence-agent
 
-这是一个面向产品经理的 AI 产品文档竞品分析 Agent 项目。当前处于 MVP V0 阶段，重点不是复杂 Agent 推理，而是建立一个可运行、可迭代、可长期扩展的工程骨架。
+这是一个面向产品经理的 product-intelligence-agent 项目。当前处于 MVP V0 阶段，重点不是复杂 Agent 推理，而是建立一个可运行、可迭代、可长期扩展的工程骨架。
 
 ## 当前能力
 
@@ -81,7 +81,7 @@ pnpm dev:web
 pnpm typecheck
 pnpm lint
 pnpm build
-pnpm --filter @ai-product-agent/api test
+pnpm --filter @product-intelligence-agent/api test
 ```
 
 ## 当前只预留但不实现的能力

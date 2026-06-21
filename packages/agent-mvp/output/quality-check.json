@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "metrics": [
+    {
+      "name": "dimension_count",
+      "value": 12,
+      "threshold": 10,
+      "passed": true
+    },
+    {
+      "name": "requirement_count",
+      "value": 7,
+      "threshold": 3,
+      "passed": true
+    },
+    {
+      "name": "covered_standard_dimension_count",
+      "value": 10,
+      "threshold": 8,
+      "passed": true
+    },
+    {
+      "name": "dimension_with_self_evidence_count",
+      "value": 12,
+      "threshold": 12,
+      "passed": true
+    },
+    {
+      "name": "dimension_with_competitor_evidence_count",
+      "value": 12,
+      "threshold": 12,
+      "passed": true
+    },
+    {
+      "name": "requirement_with_success_metrics_count",
+      "value": 7,
+      "threshold": 7,
+      "passed": true
+    }
+  ],
+  "issues": []
+}

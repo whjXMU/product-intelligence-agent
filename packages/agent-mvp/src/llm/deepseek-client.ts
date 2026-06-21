@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import OpenAI from 'openai';
 
 export interface DeepSeekClientOptions {
   packageRoot: string;
@@ -15,54 +16,87 @@ export interface ChatJsonRequest {
   temperature?: number;
 }
 
+export interface TokenUsage {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  prompt_tokens_details?: unknown;
+  completion_tokens_details?: unknown;
+  prompt_cache_hit_tokens?: number;
+  prompt_cache_miss_tokens?: number;
+}
+
 export interface ChatJsonResponse {
   content: string;
   model: string;
-  usage?: unknown;
+  usage?: TokenUsage;
+  attempts: number;
 }
 
 export class DeepSeekClient {
-  private readonly apiKey: string;
-  private readonly baseUrl: string;
+  private readonly client: OpenAI;
   private readonly model: string;
+  private readonly maxRetries: number;
 
   constructor(options: DeepSeekClientOptions) {
     const env = loadLocalEnv(options.packageRoot);
-    this.apiKey = readRequiredEnv(env, ['DEEPSEEK_API_KEY', 'LLM_API_KEY']);
-    this.baseUrl =
+    const apiKey = readRequiredEnv(env, ['DEEPSEEK_API_KEY', 'LLM_API_KEY']);
+    const baseURL =
       readOptionalEnv(env, ['DEEPSEEK_BASE_URL', 'LLM_BASE_URL']) ??
       'https://api.deepseek.com';
+    const timeout = readNumberEnv(
+      env,
+      ['DEEPSEEK_TIMEOUT_MS', 'LLM_TIMEOUT_MS'],
+      120_000,
+    );
+
     this.model =
       readOptionalEnv(env, ['DEEPSEEK_MODEL', 'LLM_MODEL_ID']) ??
       'deepseek-chat';
+    this.maxRetries = readNumberEnv(
+      env,
+      ['DEEPSEEK_MAX_RETRIES', 'LLM_MAX_RETRIES'],
+      2,
+    );
+    this.client = new OpenAI({
+      apiKey,
+      baseURL,
+      timeout,
+      maxRetries: 0,
+    });
   }
 
   async chatJson(request: ChatJsonRequest): Promise<ChatJsonResponse> {
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: this.model,
-        messages: request.messages,
-        temperature: request.temperature ?? 0.2,
-        response_format: { type: 'json_object' },
-      }),
-    });
+    let lastError: unknown;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`DeepSeek 请求失败：HTTP ${response.status} ${errorText}`);
+    for (let attempt = 1; attempt <= this.maxRetries + 1; attempt += 1) {
+      try {
+        return await this.sendChatJsonRequest(request, attempt);
+      } catch (error) {
+        lastError = error;
+
+        if (!shouldRetry(error) || attempt > this.maxRetries) {
+          break;
+        }
+
+        await sleep(800 * attempt);
+      }
     }
 
-    const payload = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-      model?: string;
-      usage?: unknown;
-    };
-    const content = payload.choices?.[0]?.message?.content;
+    throw lastError instanceof Error ? lastError : new Error('DeepSeek 请求失败');
+  }
+
+  private async sendChatJsonRequest(
+    request: ChatJsonRequest,
+    attempt: number,
+  ): Promise<ChatJsonResponse> {
+    const completion = await this.client.chat.completions.create({
+      model: this.model,
+      messages: request.messages,
+      temperature: request.temperature ?? 0.2,
+      response_format: { type: 'json_object' },
+    });
+    const content = completion.choices[0]?.message.content;
 
     if (!content) {
       throw new Error('DeepSeek 响应中没有 message.content');
@@ -70,8 +104,9 @@ export class DeepSeekClient {
 
     return {
       content,
-      model: payload.model ?? this.model,
-      usage: payload.usage,
+      model: completion.model ?? this.model,
+      usage: completion.usage,
+      attempts: attempt,
     };
   }
 }
@@ -132,4 +167,53 @@ function readOptionalEnv(
   }
 
   return undefined;
+}
+
+function readNumberEnv(
+  env: Record<string, string>,
+  keys: string[],
+  fallback: number,
+): number {
+  const value = readOptionalEnv(env, keys);
+
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
+function shouldRetry(error: unknown): boolean {
+  const status = getErrorStatus(error);
+
+  if (status !== undefined) {
+    return status === 429 || status >= 500;
+  }
+
+  if (error instanceof Error && error.name === 'AbortError') {
+    return true;
+  }
+
+  return error instanceof TypeError;
+}
+
+function getErrorStatus(error: unknown): number | undefined {
+  if (typeof error !== 'object' || error === null || !('status' in error)) {
+    return undefined;
+  }
+
+  const status = (error as { status?: unknown }).status;
+  return typeof status === 'number' ? status : undefined;
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolveSleep) => {
+    setTimeout(resolveSleep, ms);
+  });
 }

@@ -1,6 +1,6 @@
 # Codex 子窗口交接说明
 
-你正在参与一个长期 Agent 应用项目：AI 产品文档竞品分析 Agent。
+你正在参与一个长期 Agent 应用项目：product-intelligence-agent。
 
 ## 必读文件
 

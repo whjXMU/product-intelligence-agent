@@ -4,12 +4,16 @@ import type {
 } from '../schemas/index.js';
 import { standardComparisonDimensions } from '../schemas/index.js';
 
+export const COMPETITIVE_ANALYSIS_PROMPT_VERSION =
+  'competitive-analysis.v1.1.0';
+
 export function buildCompetitiveAnalysisPrompt(
   task: CompetitiveAnalysisTask,
   homepagePair: HomepagePair,
 ): string {
   return [
     '你是一位资深 AI 产品经理和竞品分析专家。',
+    `Prompt 版本：${COMPETITIVE_ANALYSIS_PROMPT_VERSION}`,
     '你的任务是基于两个官网首页提取结果，站在己方产品经理视角进行竞品比较。',
     '',
     '重要约束：',
@@ -74,5 +78,32 @@ export function buildCompetitiveAnalysisPrompt(
     '',
     '首页提取结果：',
     JSON.stringify(homepagePair, null, 2),
+  ].join('\n');
+}
+
+export function buildReportJsonRepairPrompt(input: {
+  originalContent: string;
+  errorMessage: string;
+}): string {
+  return [
+    '你是 JSON 修复器。',
+    '请把下面的模型输出修复为严格 JSON 对象，且必须匹配竞品分析报告结构。',
+    '不要新增事实，不要扩写内容，只修复 JSON 格式、字段名、枚举值、缺失的必填字段类型问题。',
+    '',
+    '结构要求：',
+    '- root.task 必须存在；',
+    '- root.summary 必须包含 conclusion、selfOverallScore、competitorOverallScore、keyGaps、topOpportunities；',
+    '- root.dimensions 必须是数组，每项包含 dimension、selfScore、competitorScore、winner、reason、selfEvidence、competitorEvidence、gap、severity；',
+    '- winner 只能是 self、competitor、tie；',
+    '- severity 只能是 low、medium、high；',
+    '- root.requirements 必须是数组，每项包含 title、priority、problem、userValue、proposedSolution、competitorReference、successMetrics、implementationNotes；',
+    '- priority 只能是 P0、P1、P2；',
+    '- root.risksAndAssumptions 必须是字符串数组。',
+    '',
+    '校验错误：',
+    input.errorMessage,
+    '',
+    '原始输出：',
+    input.originalContent,
   ].join('\n');
 }

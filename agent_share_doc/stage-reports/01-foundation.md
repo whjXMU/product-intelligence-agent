@@ -53,7 +53,7 @@
 - `pnpm typecheck`：通过；
 - `pnpm lint`：通过；
 - `pnpm build`：通过；
-- `pnpm --filter @ai-product-agent/api test`：通过；
+- `pnpm --filter @product-intelligence-agent/api test`：通过；
 - `pnpm dev:web` + `curl -I http://localhost:5173/`：前端入口返回 200；
 - `docker compose up -d postgres`：未完成，原因是本机 Docker daemon 未启动。
 

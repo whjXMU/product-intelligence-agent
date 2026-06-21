@@ -2,7 +2,7 @@
 
 ## 项目名称
 
-AI 产品文档竞品分析 Agent
+product-intelligence-agent
 
 ## 当前阶段
 
@@ -54,6 +54,7 @@ AI 产品文档竞品分析 Agent
 
 ## 最近执行记录
 
+- 2026-06-21：项目命名从 `ai-product-agent` 对齐为 `product-intelligence-agent`，workspace 包名对齐为 `@product-intelligence-agent/*`。
 - 2026-06-17：确认协作方式，采用主窗口把控、子窗口执行、Markdown 共享记忆的模式。
 - 2026-06-17：开始阶段 01，初始化共享记忆文档。
 - 2026-06-17：完成 pnpm monorepo、apps/web、apps/api、packages/shared、packages/agent-core、packages/evals 基础结构。

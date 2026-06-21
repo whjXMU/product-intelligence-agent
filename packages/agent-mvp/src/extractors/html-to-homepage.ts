@@ -45,21 +45,23 @@ export function extractHomepageProfile(
   const callToActions = interactiveTexts
     .filter((text) => callToActionPattern.test(text))
     .slice(0, 20);
-  const bodyText = convert($.html(), {
+  const bodyText = convert(getPrimaryContentHtml(input.html), {
     wordwrap: false,
     selectors: [
       { selector: 'a', options: { ignoreHref: true } },
       { selector: 'img', format: 'skip' },
     ],
   });
-  const textLines = uniqueTexts(
+  const allTextLines = uniqueTexts(
     bodyText
       .split('\n')
       .map(normalizeText)
       .filter((text) => text.length >= 8),
   );
+  const contentTextLines = allTextLines.filter(isUsefulContentLine);
 
-  const heroMessages = headings.length > 0 ? headings.slice(0, 5) : textLines.slice(0, 6);
+  const heroMessages =
+    headings.length > 0 ? headings.slice(0, 5) : contentTextLines.slice(0, 6);
   const profile: HomepageProfile = {
     productName: input.productName,
     sourceFile: input.sourceFile,
@@ -69,12 +71,12 @@ export function extractHomepageProfile(
     heroMessages,
     navigationItems,
     callToActions: uniqueTexts(callToActions),
-    productClaims: pickByPattern(textLines, productClaimPattern, 25),
-    targetUsers: pickByPattern(textLines, targetUserPattern, 15),
-    trustSignals: pickByPattern(textLines, trustSignalPattern, 15),
-    developerSignals: pickByPattern(textLines, developerSignalPattern, 15),
-    pricingSignals: pickByPattern(textLines, pricingSignalPattern, 15),
-    rawTextPreview: textLines.slice(0, 80).join('\n').slice(0, 8000),
+    productClaims: pickByPattern(contentTextLines, productClaimPattern, 25),
+    targetUsers: pickByPattern(contentTextLines, targetUserPattern, 15),
+    trustSignals: pickByPattern(allTextLines, trustSignalPattern, 15),
+    developerSignals: pickByPattern(contentTextLines, developerSignalPattern, 15),
+    pricingSignals: pickByPattern(contentTextLines, pricingSignalPattern, 15),
+    rawTextPreview: contentTextLines.slice(0, 80).join('\n').slice(0, 8000),
   };
 
   return homepageProfileSchema.parse(profile);
@@ -127,4 +129,31 @@ function uniqueTexts(values: string[]): string[] {
 
 function normalizeText(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
+}
+
+function isUsefulContentLine(value: string): boolean {
+  const legalOrFooterPattern =
+    /(版权所有|ICP备|公网安备|隐私政策|用户协议|安全漏洞|透明度|©|copyright)/i;
+
+  if (legalOrFooterPattern.test(value)) {
+    return false;
+  }
+
+  return value.length <= 260;
+}
+
+function getPrimaryContentHtml(html: string): string {
+  const $ = cheerio.load(html);
+
+  $('script, style, noscript, svg').remove();
+
+  const main = $('main').first();
+
+  if (main.length > 0) {
+    return main.html() ?? $.html(main);
+  }
+
+  $('header, nav, footer').remove();
+
+  return $('body').html() ?? $.html();
 }

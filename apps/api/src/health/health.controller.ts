@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import type { HealthCheckResponse } from '@ai-product-agent/shared';
+import type { HealthCheckResponse } from '@product-intelligence-agent/shared';
 import { HealthService } from './health.service';
 
 @Controller('health')

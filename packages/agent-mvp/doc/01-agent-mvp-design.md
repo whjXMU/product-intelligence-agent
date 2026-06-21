@@ -111,3 +111,32 @@ DEEPSEEK_MODEL=deepseek-chat
 ```
 
 后续实现模型调用时，只读取环境变量，不在日志、trace 或错误信息中输出 API Key。
+
+## 稳定性设计
+
+当前 MVP 已加入三类稳定性机制：
+
+1. 模型调用稳定性：DeepSeek client 支持超时、重试和 usage 记录；
+2. 输出结构稳定性：模型返回 JSON 后必须通过 `zod` schema；
+3. 结果质量稳定性：报告生成后会执行本地质量检查。
+
+这三类机制分别解决不同问题：
+
+- 超时和重试解决外部服务不稳定；
+- schema 校验解决模型输出格式不稳定；
+- quality check 解决“格式正确但质量不够”的问题。
+
+后续可以继续增强：
+
+- prompt 版本管理；
+- eval 样例集；
+- 成本估算；
+- 输出缓存；
+- 失败 case 归档。
+
+当前已完成：
+
+- JSON 修复重试；
+- prompt 版本管理；
+- usage 和 attempts 记录；
+- 本地 quality check。

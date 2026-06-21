@@ -1,14 +1,20 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { evaluateReportQuality } from '../evaluators/report-quality.js';
 import { extractHomepageProfile } from '../extractors/html-to-homepage.js';
 import { readAgentMvpInputs } from '../io/read-inputs.js';
 import { DeepSeekClient } from '../llm/deepseek-client.js';
-import { buildCompetitiveAnalysisPrompt } from '../prompts/competitive-analysis.prompt.js';
+import {
+  buildCompetitiveAnalysisPrompt,
+  buildReportJsonRepairPrompt,
+  COMPETITIVE_ANALYSIS_PROMPT_VERSION,
+} from '../prompts/competitive-analysis.prompt.js';
 import { renderMarkdownReport } from '../renderers/markdown-report.js';
 import {
   agentMvpTraceSchema,
   competitiveAnalysisReportSchema,
   homepagePairSchema,
+  type CompetitiveAnalysisReport,
 } from '../schemas/index.js';
 import { TraceRecorder } from '../trace/trace-recorder.js';
 
@@ -23,6 +29,7 @@ export async function runCompetitiveAnalysisWorkflow(
   mkdirSync(outputDir, { recursive: true });
 
   try {
+    const modelClient = new DeepSeekClient({ packageRoot });
     const inputs = await trace.runStep(
       'read-inputs',
       '读取任务和 HTML 输入',
@@ -56,12 +63,17 @@ export async function runCompetitiveAnalysisWorkflow(
     writeJson(resolve(outputDir, 'homepage-profiles.json'), homepagePair);
 
     const prompt = buildCompetitiveAnalysisPrompt(inputs.task, homepagePair);
+    writeJson(resolve(outputDir, 'prompt-meta.json'), {
+      promptVersion: COMPETITIVE_ANALYSIS_PROMPT_VERSION,
+      promptChars: prompt.length,
+    });
+
     const llmResponse = await trace.runStep(
       'deepseek-analysis',
       '调用 DeepSeek 生成竞品分析',
       `prompt chars=${prompt.length}`,
       () =>
-        new DeepSeekClient({ packageRoot }).chatJson({
+        modelClient.chatJson({
           messages: [
             {
               role: 'system',
@@ -74,23 +86,54 @@ export async function runCompetitiveAnalysisWorkflow(
       (result) => `model=${result.model}`,
     );
 
-    const report = await trace.runStep(
-      'parse-report',
-      '校验模型 JSON 输出',
+    const parseResult = await trace.runStep(
+      'parse-or-repair-report',
+      '校验模型 JSON 输出，必要时修复',
       'DeepSeek message.content',
-      () =>
-        competitiveAnalysisReportSchema.parse(
-          JSON.parse(extractJsonObject(llmResponse.content)),
-        ),
+      () => parseOrRepairReport(modelClient, llmResponse.content),
       (result) =>
-        `dimensions=${result.dimensions.length}, requirements=${result.requirements.length}`,
+        `repaired=${result.repaired}, dimensions=${result.report.dimensions.length}, requirements=${result.report.requirements.length}`,
+    );
+    const report = parseResult.report;
+
+    writeJson(resolve(outputDir, 'llm-response-meta.json'), {
+      model: llmResponse.model,
+      usage: llmResponse.usage,
+      attempts: llmResponse.attempts,
+      jsonRepair: {
+        repaired: parseResult.repaired,
+        repairAttempts: parseResult.repairAttempts,
+        repairModel: parseResult.repairModel,
+        repairUsage: parseResult.repairUsage,
+      },
+    });
+
+    const qualityCheck = await trace.runStep(
+      'quality-check',
+      '执行本地报告质量检查',
+      'report.json',
+      () => evaluateReportQuality(report),
+      (result) =>
+        `passed=${result.passed}, issues=${result.issues.length}, metrics=${result.metrics.length}`,
     );
 
     writeJson(resolve(outputDir, 'report.json'), report);
     writeFileSync(resolve(outputDir, 'report.md'), renderMarkdownReport(report));
+    writeJson(resolve(outputDir, 'quality-check.json'), qualityCheck);
   } finally {
-    writeJson(resolve(outputDir, 'trace.json'), agentMvpTraceSchema.parse(trace.toJSON()));
+    writeJson(
+      resolve(outputDir, 'trace.json'),
+      agentMvpTraceSchema.parse(trace.toJSON()),
+    );
   }
+}
+
+interface ParseOrRepairResult {
+  report: CompetitiveAnalysisReport;
+  repaired: boolean;
+  repairAttempts: number;
+  repairModel?: string;
+  repairUsage?: unknown;
 }
 
 function writeJson(path: string, value: unknown): void {
@@ -112,4 +155,50 @@ function extractJsonObject(content: string): string {
   }
 
   return trimmed.slice(start, end + 1);
+}
+
+async function parseOrRepairReport(
+  modelClient: DeepSeekClient,
+  content: string,
+): Promise<ParseOrRepairResult> {
+  try {
+    return {
+      report: parseReportContent(content),
+      repaired: false,
+      repairAttempts: 0,
+    };
+  } catch (error) {
+    const repairResponse = await modelClient.chatJson({
+      temperature: 0,
+      messages: [
+        {
+          role: 'system',
+          content:
+            '你只输出严格 JSON。你是 JSON 修复器，不负责重新分析或新增事实。',
+        },
+        {
+          role: 'user',
+          content: buildReportJsonRepairPrompt({
+            originalContent: content,
+            errorMessage:
+              error instanceof Error ? error.message : '未知 JSON 校验错误',
+          }),
+        },
+      ],
+    });
+
+    return {
+      report: parseReportContent(repairResponse.content),
+      repaired: true,
+      repairAttempts: repairResponse.attempts,
+      repairModel: repairResponse.model,
+      repairUsage: repairResponse.usage,
+    };
+  }
+}
+
+function parseReportContent(content: string): CompetitiveAnalysisReport {
+  return competitiveAnalysisReportSchema.parse(
+    JSON.parse(extractJsonObject(content)),
+  );
 }

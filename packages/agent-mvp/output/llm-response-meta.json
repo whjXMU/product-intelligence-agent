@@ -1,0 +1,21 @@
+{
+  "model": "deepseek-v4-pro",
+  "usage": {
+    "prompt_tokens": 3257,
+    "completion_tokens": 8233,
+    "total_tokens": 11490,
+    "prompt_tokens_details": {
+      "cached_tokens": 3200
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3497
+    },
+    "prompt_cache_hit_tokens": 3200,
+    "prompt_cache_miss_tokens": 57
+  },
+  "attempts": 1,
+  "jsonRepair": {
+    "repaired": false,
+    "repairAttempts": 0
+  }
+}

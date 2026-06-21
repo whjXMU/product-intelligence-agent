@@ -70,7 +70,7 @@ http://localhost:5173
 pnpm typecheck
 pnpm lint
 pnpm build
-pnpm --filter @ai-product-agent/api test
+pnpm --filter @product-intelligence-agent/api test
 ```
 
 ## 常见问题

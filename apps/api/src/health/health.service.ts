@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { HealthCheckResponse } from '@ai-product-agent/shared';
+import type { HealthCheckResponse } from '@product-intelligence-agent/shared';
 import { DataSource } from 'typeorm';
 
 @Injectable()
@@ -44,7 +44,7 @@ export class HealthService {
 
   private getServiceStatus(): HealthCheckResponse['service'] {
     return {
-      name: 'ai-product-agent-api',
+      name: 'product-intelligence-agent-api',
       status: 'ok',
       uptimeSeconds: Math.round(process.uptime()),
       timestamp: new Date().toISOString(),

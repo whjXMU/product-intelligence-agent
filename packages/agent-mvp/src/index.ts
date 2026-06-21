@@ -24,6 +24,9 @@ if (requiredPaths.every((relativePath) => existsSync(resolve(packageRoot, relati
   console.log(`已输出: ${resolve(packageRoot, 'output/homepage-profiles.json')}`);
   console.log(`已输出: ${resolve(packageRoot, 'output/report.json')}`);
   console.log(`已输出: ${resolve(packageRoot, 'output/report.md')}`);
+  console.log(`已输出: ${resolve(packageRoot, 'output/quality-check.json')}`);
+  console.log(`已输出: ${resolve(packageRoot, 'output/llm-response-meta.json')}`);
+  console.log(`已输出: ${resolve(packageRoot, 'output/prompt-meta.json')}`);
   console.log(`已输出: ${resolve(packageRoot, 'output/trace.json')}`);
 } else {
   console.log('下一步：复制 input/task.example.json 为 input/task.json，并放入两个 HTML 文件。');

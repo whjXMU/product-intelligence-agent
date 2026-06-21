@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import type { HealthCheckResponse } from '@ai-product-agent/shared'
+import type { HealthCheckResponse } from '@product-intelligence-agent/shared'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
 
@@ -43,7 +43,7 @@ onMounted(() => {
     <section class="summary">
       <div>
         <p class="eyebrow">MVP V0</p>
-        <h1>AI 产品文档竞品分析 Agent</h1>
+        <h1>product-intelligence-agent</h1>
         <p class="lead">当前阶段聚焦工程骨架、数据库连接和 Agent 边界预留。</p>
       </div>
 
@@ -56,7 +56,7 @@ onMounted(() => {
       <article class="status-card">
         <span class="label">API 服务</span>
         <strong>{{ health?.service.status === 'ok' ? '运行中' : '等待检测' }}</strong>
-        <small>{{ health?.service.name ?? 'ai-product-agent-api' }}</small>
+        <small>{{ health?.service.name ?? 'product-intelligence-agent-api' }}</small>
       </article>
 
       <article class="status-card">

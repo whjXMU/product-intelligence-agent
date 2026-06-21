@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: ai-product-agent-postgres
+    container_name: product-intelligence-agent-postgres
     environment:
       POSTGRES_USER: agent
       POSTGRES_PASSWORD: agent
