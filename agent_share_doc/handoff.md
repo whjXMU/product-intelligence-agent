@@ -11,15 +11,34 @@
 3. `docs/architecture.md`
 4. `docs/roadmap.md`
 5. `README.md`
+6. 当前阶段任务说明：`agent_share_doc/stage-reports/02-analysis-task.md`
+
+如果任务涉及 Agent MVP 实验结果，再额外阅读：
+
+7. `agent_share_doc/stage-reports/02-agent-mvp.md`
+8. `docs/adr/0002-agent-mvp-spike-boundary.md`
 
 ## 协作原则
 
 - 当前窗口是主窗口，负责架构把控、阶段拆分和验收。
 - 子窗口只执行被明确分配的阶段任务。
 - 子窗口不要擅自改变总体架构方向。
+- 子窗口不要把 `packages/agent-mvp` 的实验实现直接升级为正式架构。
 - 所有重要阶段结果必须写入 Markdown。
 - 修改代码前先说明目标、目录变化和关键设计原因。
 - 文档必须使用中文。
+
+## 当前主线说明
+
+`packages/agent-mvp` 是一次 Agent 能力验证 spike，已经证明“手动 HTML 输入 + DeepSeek 分析 + JSON/Markdown/trace 输出”的链路可行。
+
+但正式产品主线仍然按以下顺序推进：
+
+1. 先建设业务任务骨架；
+2. 再建设正式 Agent Core 与 Workflow；
+3. 最后把模型调用、工具、评估和可观测性接入到稳定边界中。
+
+任何子窗口如果被分配到正式 Agent 实现任务，必须先确认是否已经进入对应正式阶段，不得直接沿用 spike 的目录和边界。
 
 ## Agent 工程心智模型
 

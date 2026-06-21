@@ -48,6 +48,12 @@ docs/
 
 存放评估样例和评估入口。当前只占位，未来用于判断 Agent 输出质量是否稳定提升。
 
+### packages/agent-mvp
+
+实验包，用于记录 Agent MVP spike。它已经验证“手动 HTML 输入、模型分析、结构化报告、trace 输出”的可行性，但不作为正式 Agent 架构直接继承。
+
+正式 Agent 能力应在业务任务骨架稳定后，重新拆分进 `packages/agent-core`、`apps/api` 和后续 evals/observability 模块。
+
 ## Agent 工程边界
 
 - Model：未来封装模型调用、结构化输出、流式输出；
@@ -65,4 +71,5 @@ docs/
 - 不提前引入多 Agent、RAG、队列和向量数据库；
 - 不复制 DTO，优先从 `packages/shared` 引用；
 - 数据库变更通过 migration 演进；
+- 不把 `packages/agent-mvp` 的 spike 实现直接升级为正式架构；
 - 每个阶段完成后更新共享记忆和阶段报告。

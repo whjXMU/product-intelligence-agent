@@ -1,4 +1,28 @@
-# 阶段 02 报告：Agent MVP 核心能力验证
+# Spike 报告：Agent MVP 核心能力验证
+
+## 主窗口定性
+
+本文件记录的是一次 Agent 能力验证 spike，不是正式阶段 02 的产品工程实现。
+
+本次实验已经证明以下链路具备可行性：
+
+- 手动 HTML 输入；
+- 页面结构化提取；
+- DeepSeek 分析；
+- JSON schema 校验；
+- Markdown 报告生成；
+- trace 和质量检查输出。
+
+但 `packages/agent-mvp` 当前仍是实验包，存在以下限制：
+
+- 工程边界不等同于正式 `agent-core`；
+- 没有接入后端任务系统；
+- 没有数据库持久化；
+- 没有前端产品体验；
+- 没有完整权限、观测、评估和失败恢复机制；
+- 不应被后续子窗口直接升级为正式 Agent 架构。
+
+正式阶段 02 将回到业务任务骨架：`analysis_tasks`、任务 API、前端任务列表和 mock 报告。正式 Agent 工程化会在业务主线稳定后重新设计。
 
 ## 阶段目标
 
@@ -160,3 +184,11 @@ pnpm build
 ## 当前阻塞
 
 暂无。
+
+## 后续复用方式
+
+正式 Agent 工程化时可以复用本 spike 的经验，而不是照搬代码边界：
+
+- 复用：prompt 版本管理、JSON 修复思路、质量检查指标、trace 输出字段经验；
+- 重建：Model Provider、Workflow Runner、Tool Registry、Guardrails、Observability、Eval Runner；
+- 迁移条件：正式任务系统、报告 schema 和 trace schema 稳定后，再把实验能力拆分进 `packages/agent-core` 和 `apps/api`。

@@ -6,24 +6,25 @@ product-intelligence-agent
 
 ## 当前阶段
 
-阶段 02：Agent MVP 核心能力验证。
+阶段 02：竞品分析任务业务骨架准备中。
 
 ## 当前目标
 
-在 `packages/agent-mvp` 中优先验证 Agent 核心链路：
+准备建立正式产品主线的第一个业务闭环：竞品分析任务。
 
-- 手动提供己方和竞品 HTML；
-- 清洗并结构化页面内容；
-- 使用 DeepSeek 进行竞品首页比较；
-- 输出评分、差距分析和产品优化需求；
-- 生成 JSON、Markdown 和 trace。
+- 后端新增 `analysis_tasks` 表和任务 API；
+- 前端新增任务工作台；
+- 分析结果先使用 mock；
+- 为未来正式 Agent Workflow 预留 `result`、`trace`、`status` 等边界；
+- 继续保持 `packages/agent-mvp` 的实验包定位。
 
 ## 当前立即实现
 
-- `packages/agent-mvp` workspace package；
-- Agent MVP 输入输出目录；
-- Agent MVP 设计文档；
-- 后续 HTML 解析、DeepSeek client、workflow 的工程边界。
+- 创建 `analysis_tasks` 数据模型；
+- 创建任务 API；
+- 创建前端任务创建、列表、详情视图；
+- 创建 mock 分析报告；
+- 维护 shared DTO。
 
 ## 当前只预留
 
@@ -39,6 +40,8 @@ product-intelligence-agent
 - schema 校验；
 - markdown renderer。
 
+> 说明：上述 DeepSeek、HTML parser、schema 校验和 markdown renderer 已在 spike 中验证过一版，但正式工程化实现需要在后续阶段重新设计边界后再接入。
+
 ## 当前不实现
 
 - 复杂 Agent 推理；
@@ -48,12 +51,14 @@ product-intelligence-agent
 - 队列系统；
 - 真实 LLM 调用；
 - 文档解析和网页抓取。
-- 前端页面；
-- 后端 API；
-- 数据库存储。
+- 把 `packages/agent-mvp` 直接升级为正式 Agent 实现。
+- 正式 Agent Workflow。
 
 ## 最近执行记录
 
+- 2026-06-22：执行阶段 01.5，开始校准主线文档，把 Agent MVP 验证归档为 spike。
+- 2026-06-22：完成阶段 01.5，补充 handoff、roadmap、architecture、ADR 和 spike 报告定性。
+- 2026-06-22：创建阶段 02 任务说明，明确先做 `analysis_tasks` 业务骨架，再接正式 Agent Workflow。
 - 2026-06-21：项目命名从 `ai-product-agent` 对齐为 `product-intelligence-agent`，workspace 包名对齐为 `@product-intelligence-agent/*`。
 - 2026-06-17：确认协作方式，采用主窗口把控、子窗口执行、Markdown 共享记忆的模式。
 - 2026-06-17：开始阶段 01，初始化共享记忆文档。
@@ -67,4 +72,6 @@ product-intelligence-agent
 
 ## 下一步
 
-为 Agent MVP 增加输入输出 schema、HTML 清洗器、DeepSeek model client 和 competitive-analysis workflow。
+1. 开启后端子窗口，按 `agent_share_doc/stage-reports/02-analysis-task.md` 实现任务 API 和数据库模型；
+2. 后端契约稳定后，开启前端子窗口实现任务工作台；
+3. 回到主窗口做验收、修正和文档收尾。
