@@ -1,0 +1,165 @@
+{
+  "self": {
+    "productName": "DeepSeek",
+    "sourceFile": "self.html",
+    "title": "DeepSeek | 深度求索",
+    "metaDescription": "深度求索（DeepSeek），成立于2023年，专注于研究世界领先的通用人工智能底层模型与技术，挑战人工智能前沿性难题。基于自研训练框架、自建智算集群和万卡算力等资源，深度求索团队仅用半年时间便已发布并开源多个百亿级参数大模型，如DeepSeek-LLM通用大语言模型、DeepSeek-Coder代码大模型，并在2024年1月率先开源国内首个MoE大模型（DeepSeek-MoE），各大模型在公开评测榜单及真实样本外的泛化效果均有超越同级别模型的出色表现。和 DeepSeek AI 对话，轻松接入 API。",
+    "headings": [],
+    "heroMessages": [
+      "🎉 DeepSeek-V4 预览版本发布，具备世界顶级推理性能，Agent 能力大幅提高，已在网页端、APP 和 API 上线，点击查看详情。",
+      "与 DeepSeek 免费对话",
+      "体验全新旗舰模型",
+      "API 开放平台",
+      "调用 DeepSeek 最新模型",
+      "快速集成、流畅体验"
+    ],
+    "navigationItems": [],
+    "callToActions": [
+      "🎉 DeepSeek-V4 预览版本发布，具备世界顶级推理性能，Agent 能力大幅提高，已在网页端、APP 和 API 上线，点击查看详情。",
+      "开始对话与 DeepSeek 免费对话体验全新旗舰模型",
+      "API 开放平台调用 DeepSeek 最新模型快速集成、流畅体验",
+      "API 文档",
+      "API 价格"
+    ],
+    "productClaims": [
+      "🎉 DeepSeek-V4 预览版本发布，具备世界顶级推理性能，Agent 能力大幅提高，已在网页端、APP 和 API 上线，点击查看详情。",
+      "体验全新旗舰模型",
+      "API 开放平台",
+      "调用 DeepSeek 最新模型",
+      "API 文档获取 AppEnglish",
+      "© 2026 杭州深度求索人工智能基础技术研究有限公司 版权所有",
+      "DeepSeek AppDeepSeek 网页版开放平台API 价格服务状态",
+      "隐私政策用户协议反馈安全漏洞透明度"
+    ],
+    "targetUsers": [
+      "© 2026 杭州深度求索人工智能基础技术研究有限公司 版权所有",
+      "隐私政策用户协议反馈安全漏洞透明度"
+    ],
+    "trustSignals": [
+      "隐私政策用户协议反馈安全漏洞透明度"
+    ],
+    "developerSignals": [
+      "🎉 DeepSeek-V4 预览版本发布，具备世界顶级推理性能，Agent 能力大幅提高，已在网页端、APP 和 API 上线，点击查看详情。",
+      "API 开放平台",
+      "API 文档获取 AppEnglish",
+      "DeepSeek AppDeepSeek 网页版开放平台API 价格服务状态"
+    ],
+    "pricingSignals": [
+      "与 DeepSeek 免费对话",
+      "DeepSeek AppDeepSeek 网页版开放平台API 价格服务状态"
+    ],
+    "rawTextPreview": "🎉 DeepSeek-V4 预览版本发布，具备世界顶级推理性能，Agent 能力大幅提高，已在网页端、APP 和 API 上线，点击查看详情。\n与 DeepSeek 免费对话\n体验全新旗舰模型\nAPI 开放平台\n调用 DeepSeek 最新模型\n快速集成、流畅体验\nAPI 文档获取 AppEnglish\n© 2026 杭州深度求索人工智能基础技术研究有限公司 版权所有\n浙ICP备2023025841号浙B2-20250178浙公网安备33010502011812号\nDeepSeek R1DeepSeek V3DeepSeek Coder V2DeepSeek VLDeepSeek V2DeepSeek CoderDeepSeek MathDeepSeek LLM\nDeepSeek AppDeepSeek 网页版开放平台API 价格服务状态\n隐私政策用户协议反馈安全漏洞透明度"
+  },
+  "competitor": {
+    "productName": "OpenAI",
+    "sourceFile": "competitor.html",
+    "title": "ChatGPT | AI 聊天机器人，陪你探索、学习与创造",
+    "metaDescription": "",
+    "headings": [
+      "获取答案，寻找灵感，提升效率。",
+      "陪你写作、构思、修改并发现新想法。",
+      "总结会议内容，获取全新启发，提高工作效率。",
+      "生成并调试代码，实现重复工作的自动化，探索全新 API。",
+      "探索新知，培养爱好，破解难题。",
+      "探索 ChatGPT 的更多功能",
+      "立即开始使用 ChatGPT",
+      "加入数亿用户行列，马上体验 ChatGPT。"
+    ],
+    "heroMessages": [
+      "获取答案，寻找灵感，提升效率。",
+      "陪你写作、构思、修改并发现新想法。",
+      "总结会议内容，获取全新启发，提高工作效率。",
+      "生成并调试代码，实现重复工作的自动化，探索全新 API。",
+      "探索新知，培养爱好，破解难题。"
+    ],
+    "navigationItems": [
+      "简介",
+      "智能体",
+      "应用",
+      "Atlas",
+      "深入研究",
+      "桌面应用",
+      "群聊",
+      "图片",
+      "购物",
+      "学习模式",
+      "语音",
+      "语音功能（支持视频）",
+      "学生",
+      "大学教师",
+      "教师",
+      "科学与医学",
+      "家长",
+      "退役军人",
+      "运动锻炼与保健养生",
+      "个人理财",
+      "食谱与烹饪",
+      "Travel and Exploration",
+      "ChatGPT 中的 Canva",
+      "ChatGPT 中的 Spotify",
+      "ChatGPT for PowerPoint",
+      "与 PDF 对话",
+      "与演示文稿对话",
+      "与电子表格对话",
+      "适用于大学生",
+      "Codex"
+    ],
+    "callToActions": [
+      "开发者文档",
+      "联系销售团队",
+      "下载",
+      "试用 ChatGPT",
+      "开始使用",
+      "了解 GPT-5.5"
+    ],
+    "productClaims": [
+      "* Enterprise",
+      "AI 解决方案适用于",
+      "* Enterprise 版",
+      "获取答案，寻找灵感，提升效率。",
+      "现已搭载 GPT-5.5，这是我们目前针对专业化工作负载能力最强、效率最高的前沿模型。",
+      "打造一个晨间流程，让我在一天中效率更高",
+      "总结会议内容，获取全新启发，提高工作效率。",
+      "生成并调试代码，实现重复工作的自动化，探索全新 API。",
+      "智能体为你完成复杂任务的每一步",
+      "推出 ChatGPT 智能体",
+      "日常任务的智能解决方案",
+      "* 有限使用旗舰模型 GPT-5.2",
+      "* 旗舰模型 GPT-5.2 的更高使用权限",
+      "以更先进的智能完成更多工作",
+      "* 高级推理模型",
+      "* 更高的深度研究和智能体模式使用权限",
+      "* Codex 智能体和 Sora 视频生成",
+      "* GPT-5.2 Pro 专业推理能力",
+      "* 深度研究和智能体模式的最大支持",
+      "* 具备优先速度的高级 Codex 智能体",
+      "OpenAI © 2015–2026你的隐私选择"
+    ],
+    "targetUsers": [
+      "* 适用于大学生",
+      "* Enterprise",
+      "Business",
+      "* 联系销售团队",
+      "* Business",
+      "* Enterprise 版",
+      "* 有限使用深度研究",
+      "* 更高的深度研究和智能体模式使用权限",
+      "* 深度研究和智能体模式的最大支持",
+      "* 新功能的研究预览",
+      "加入数亿用户行列，马上体验 CHATGPT。"
+    ],
+    "trustSignals": [
+      "在 2024 年 6 月的 WWDC 上，我们宣布与 Apple 建立合作伙伴关系，将 ChatGPT 融入 iOS、iPadOS 和 macOS 的使用体验。",
+      "OpenAI © 2015–2026你的隐私选择"
+    ],
+    "developerSignals": [
+      "生成并调试代码，实现重复工作的自动化，探索全新 API。"
+    ],
+    "pricingSignals": [
+      "橙汁的价格为何下降了？",
+      "已有套餐？请参阅账单帮助⁠",
+      "此套餐可能包含广告。 了解更多信息⁠"
+    ],
+    "rawTextPreview": "* 语音功能（支持视频）\nChatGPT 适用于\n* 运动锻炼与保健养生\n* Travel and Exploration\n* ChatGPT 中的 Canva\n* ChatGPT 中的 Spotify\n* ChatGPT for PowerPoint\n* 与 PDF 对话\n* 与演示文稿对话\n* 与电子表格对话\n* 适用于大学生\n* Codex for Work\n* Enterprise\n* Codex 移动版\n* 切换至 Codex\n* Codex 动态\nBusiness\n* 联系销售团队\nAI 解决方案适用于\n* 数据科学与分析\n* 销售与市场营销\n* Business\n* Enterprise 版\n* K–12 教师\n试用 ChatGPT\n获取答案，寻找灵感，提升效率。\n现已搭载 GPT-5.5，这是我们目前针对专业化工作负载能力最强、效率最高的前沿模型。\n了解 GPT-5.5\n橙汁的价格为何下降了？\n帮我出些主意，孩子的作品可以怎样保存或展示\n帮我复习大学入学考试的词汇\n油价如何影响全球能源市场\n测试我的古代文明知识\n写一条短信，邀请朋友作为我的婚礼伴侣出席\n寻找一款环保且防滑的瑜伽垫\n欧冠联赛最佳射手与精彩比赛回顾\n我想要一款适合长途飞行的降噪耳机\n帮我挑一套在镜头前看起来不错的服装\n写一封邮件，向附近的水管工索取报价\n欢迎初学者加入的骑行团体\n编写一个 Python 脚本，用于自动发送每日邮件报告\nNASA 带回的小行星样本，目前有什么最新情况？\n打造一个晨间流程，让我在一天中效率更高\n帮我安排一个“心理健康日”，让我放松一下\n设计一个编程游戏，以有趣的方式教授基础知识\nNBA 选秀潜力球员及球探分析\n向幼儿园小朋友解释怀旧情感\n规划一次旅行，像当地人一样体验首尔\n为 TikTok 帐户创建内容日历\n最新欧盟通胀数据和经济预测\n我想用厨房里的食材做一个三明治\n附近有哪些提供户外座位的优质早午餐餐厅？\n陪你写作、构思、修改并发现新想法。\n详细了解如何使用 ChatGPT 进行写作\n总结会议内容，获取全新启发，提高工作效率。\n生成并调试代码，实现重复工作的自动化，探索全新 API。\n探索新知，培养爱好，破解难题。\n探索 CHATGPT 的更多功能\n随心输入或语音交流\n通过移动应用中的声波图标，你可以与 ChatGPT 开启实时对话。\n点击网页搜索图标，即可快速获得及时答案，并附有相关网页链接。\n了解更多适用于商家\n协作完成写作与编程\n借助画布功能，你能够与 ChatGPT 合作，一起完成编辑和修订等项目。\n分析数据并创建图表\n上传文件，让 ChatGPT 帮你分析数据、总结信息或生成图表。\n拍摄或上传图片，然后向 ChatGPT 提问。\n智能体为你完成复杂任务的每一步\n让 ChatGPT 帮你在网上完成任务。\n推出 ChatGPT 智能体\n只需一句话或一段详细描述，ChatGPT 就能为你生成图像。\nAPPLE 携手 CHATGPT\n在 2024 年 6 月的 WWDC 上，我们宣布与 Apple 建立合作伙伴关系，将 ChatGPT 融入 iOS、iPadOS 和 macOS 的使用体验。\n立即开始使用 CHATGPT\n日常任务的智能解决方案\n* 有限使用旗舰模型 GPT-5.2\n* 消息和上传的数量受限\n* 图像生成受限，速度较慢\n* 有限使用深度研究\n* 记忆与上下文支持受限"
+  }
+}

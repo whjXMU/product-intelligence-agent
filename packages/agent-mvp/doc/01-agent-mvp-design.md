@@ -87,6 +87,17 @@ packages/agent-mvp/output/
 - Schema 校验负责稳定输出结构；
 - 单 Agent workflow 便于调试和教学。
 
+## Schema 策略
+
+当前阶段采用 `zod`：
+
+- `zod` schema 负责运行时校验；
+- `z.infer` 负责推导 TypeScript 类型；
+- `task.json`、homepage profile、report、trace 都需要经过 schema；
+- 后续 DeepSeek 返回的 JSON 也必须经过 schema 才能进入报告输出。
+
+这是 Agent 工程的关键实践：模型输出不可信，必须经过结构化校验。
+
 ## DeepSeek Provider
 
 `.env` 文件由开发者本地维护，不提交 Git。

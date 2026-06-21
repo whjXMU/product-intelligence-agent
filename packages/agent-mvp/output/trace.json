@@ -1,0 +1,46 @@
+{
+  "traceId": "trace-1782013870599",
+  "taskName": "competitive-homepage-analysis",
+  "steps": [
+    {
+      "stepId": "read-inputs",
+      "name": "读取任务和 HTML 输入",
+      "status": "success",
+      "startedAt": "2026-06-21T03:51:10.599Z",
+      "endedAt": "2026-06-21T03:51:10.604Z",
+      "durationMs": 5,
+      "inputSummary": "task.json, self.html, competitor.html",
+      "outputSummary": "DeepSeek vs OpenAI"
+    },
+    {
+      "stepId": "extract-homepage-profiles",
+      "name": "提取首页结构化信息",
+      "status": "success",
+      "startedAt": "2026-06-21T03:51:10.604Z",
+      "endedAt": "2026-06-21T03:51:10.678Z",
+      "durationMs": 74,
+      "inputSummary": "两个 HTML 文件",
+      "outputSummary": "self headings=0, competitor headings=8"
+    },
+    {
+      "stepId": "deepseek-analysis",
+      "name": "调用 DeepSeek 生成竞品分析",
+      "status": "success",
+      "startedAt": "2026-06-21T03:51:10.679Z",
+      "endedAt": "2026-06-21T03:52:43.227Z",
+      "durationMs": 92548,
+      "inputSummary": "prompt chars=7889",
+      "outputSummary": "model=deepseek-v4-pro"
+    },
+    {
+      "stepId": "parse-report",
+      "name": "校验模型 JSON 输出",
+      "status": "success",
+      "startedAt": "2026-06-21T03:52:43.227Z",
+      "endedAt": "2026-06-21T03:52:43.229Z",
+      "durationMs": 2,
+      "inputSummary": "DeepSeek message.content",
+      "outputSummary": "dimensions=12, requirements=6"
+    }
+  ]
+}

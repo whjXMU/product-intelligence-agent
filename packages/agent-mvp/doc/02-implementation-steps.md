@@ -24,7 +24,18 @@ src/schemas/homepage.schema.ts
 src/schemas/report.schema.ts
 ```
 
-建议使用 `zod`，但需要先安装依赖。
+当前实现：
+
+- 使用 `zod` 定义 schema；
+- 使用 `z.infer` 推导 TypeScript 类型；
+- 对 `task.json`、中间态 homepage profile、最终 report、trace 都保留运行时校验入口；
+- 后续对 LLM 输出做严格 parse，失败时进入修复或重试流程。
+
+为什么不直接只写 TypeScript 类型：
+
+- TypeScript 类型只在编译期有效；
+- `task.json` 和 LLM 返回值都是运行时数据；
+- Agent 项目必须重视运行时校验，否则错误会延迟到 workflow 后半段才暴露。
 
 ## Step 3：HTML 清洗与首页信息提取
 
@@ -34,6 +45,20 @@ src/schemas/report.schema.ts
 
 - `cheerio`：解析静态 HTML；
 - `html-to-text`：可选，用于正文文本抽取。
+
+当前实现：
+
+- 使用 `cheerio` 提取 title、description、heading、nav、button/link 文案；
+- 使用 `html-to-text` 抽取正文文本预览；
+- 使用关键词规则初步归类 CTA、产品主张、目标用户、信任信号、开发者信号和定价信号；
+- 输出 `output/homepage-profiles.json`，作为 LLM 分析前的可审计中间态。
+
+为什么要有这个中间态：
+
+- 避免把整份 HTML 直接丢给模型；
+- 减少 token 浪费；
+- 降低无关脚本、样式、导航噪声；
+- 方便人工检查 Agent 到底基于什么信息做判断。
 
 ## Step 4：DeepSeek Model Client
 
