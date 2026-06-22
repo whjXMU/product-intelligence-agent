@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AnalysisTaskEntity } from '../entities/analysis-task.entity';
@@ -96,10 +96,10 @@ describe('AnalysisTasksService', () => {
 
   it('creates an analysis task with created status', async () => {
     const task = await service.create({
-      title: '  OpenAI 与 DeepSeek 首页竞品分析  ',
-      productName: ' OpenAI ',
-      competitorName: ' DeepSeek ',
-      analysisGoal: ' 比较首页定位、核心卖点、用户转化路径 ',
+      title: 'OpenAI 与 DeepSeek 首页竞品分析',
+      productName: 'OpenAI',
+      competitorName: 'DeepSeek',
+      analysisGoal: '比较首页定位、核心卖点、用户转化路径',
       sourceType: 'manual',
       input: {
         notes: '当前阶段只保存输入，不抓取网页。',
@@ -118,19 +118,6 @@ describe('AnalysisTasksService', () => {
     );
     expect(task.status).toBe('created');
     expect(task.createdAt).toBe('2026-06-22T00:00:00.000Z');
-  });
-
-  it('rejects unsupported source types', async () => {
-    await expect(
-      service.create({
-        title: 'title',
-        productName: 'product',
-        competitorName: 'competitor',
-        analysisGoal: 'goal',
-        sourceType: 'manual-web' as 'manual',
-        input: {},
-      }),
-    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('returns list items without input, result or trace payloads', async () => {

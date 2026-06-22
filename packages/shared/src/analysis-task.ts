@@ -1,13 +1,18 @@
+import { z } from 'zod';
+
 export type AnalysisTaskStatus = 'created' | 'running' | 'completed' | 'failed';
 
 export type AnalysisTaskSourceType = 'manual';
 
-export interface AnalysisTaskInput {
-  selfUrl?: string;
-  competitorUrl?: string;
-  notes?: string;
-  [key: string]: unknown;
-}
+export const analysisTaskInputSchema = z
+  .object({
+    selfUrl: z.string().optional(),
+    competitorUrl: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .passthrough();
+
+export type AnalysisTaskInput = z.infer<typeof analysisTaskInputSchema>;
 
 export interface AnalysisTaskMockResult {
   summary: string;
@@ -30,15 +35,19 @@ export interface AnalysisTaskTrace {
   steps: AnalysisTaskTraceStep[];
 }
 
+export const createAnalysisTaskRequestSchema = z.object({
+  title: z.string().trim().min(1, 'title is required'),
+  productName: z.string().trim().min(1, 'productName is required'),
+  competitorName: z.string().trim().min(1, 'competitorName is required'),
+  analysisGoal: z.string().trim().min(1, 'analysisGoal is required'),
+  sourceType: z.literal('manual'),
+  input: analysisTaskInputSchema,
+});
+
 // 创建请求DTO-前端传递的数据
-export interface CreateAnalysisTaskRequest {
-  title: string;
-  productName: string;
-  competitorName: string;
-  analysisGoal: string;
-  sourceType: AnalysisTaskSourceType;
-  input: AnalysisTaskInput;
-}
+export type CreateAnalysisTaskRequest = z.infer<
+  typeof createAnalysisTaskRequestSchema
+>;
 
 // 后端返回的数据
 export interface AnalysisTaskDto {

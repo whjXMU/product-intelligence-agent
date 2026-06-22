@@ -1,9 +1,11 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import type {
-  AnalysisTaskDto,
-  AnalysisTaskListItemDto,
-  CreateAnalysisTaskRequest,
+import {
+  createAnalysisTaskRequestSchema,
+  type AnalysisTaskDto,
+  type AnalysisTaskListItemDto,
+  type CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared';
+import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
 import { AnalysisTasksService } from '../services/analysis-tasks.service';
 
 @Controller('analysis-tasks')
@@ -12,7 +14,8 @@ export class AnalysisTasksController {
 
   @Post()
   async create(
-    @Body() request: CreateAnalysisTaskRequest,
+    @Body(new ZodValidationPipe(createAnalysisTaskRequestSchema))
+    request: CreateAnalysisTaskRequest,
   ): Promise<AnalysisTaskDto> {
     return this.analysisTasksService.create(request);
   }

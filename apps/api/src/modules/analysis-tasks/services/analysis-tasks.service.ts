@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type {
   AnalysisTaskDto,
@@ -26,13 +22,11 @@ export class AnalysisTasksService {
   ) {}
 
   async create(request: CreateAnalysisTaskRequest): Promise<AnalysisTaskDto> {
-    this.validateCreateRequest(request);
-
     const entity = this.analysisTasksRepository.create({
-      title: request.title.trim(),
-      productName: request.productName.trim(),
-      competitorName: request.competitorName.trim(),
-      analysisGoal: request.analysisGoal.trim(),
+      title: request.title,
+      productName: request.productName,
+      competitorName: request.competitorName,
+      analysisGoal: request.analysisGoal,
       sourceType: request.sourceType,
       input: request.input,
       status: 'created',
@@ -85,33 +79,5 @@ export class AnalysisTasksService {
     }
 
     return task;
-  }
-
-  private validateCreateRequest(request: CreateAnalysisTaskRequest): void {
-    const requiredTextFields: Array<keyof CreateAnalysisTaskRequest> = [
-      'title',
-      'productName',
-      'competitorName',
-      'analysisGoal',
-    ];
-
-    for (const field of requiredTextFields) {
-      const value = request[field];
-      if (typeof value !== 'string' || value.trim().length === 0) {
-        throw new BadRequestException(`${field} is required`);
-      }
-    }
-
-    if (request.sourceType !== 'manual') {
-      throw new BadRequestException('sourceType must be manual');
-    }
-
-    if (
-      !request.input ||
-      typeof request.input !== 'object' ||
-      Array.isArray(request.input)
-    ) {
-      throw new BadRequestException('input must be an object');
-    }
   }
 }
