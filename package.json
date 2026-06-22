@@ -17,7 +17,9 @@
     "agent:mvp:typecheck": "pnpm --filter @product-intelligence-agent/agent-mvp typecheck",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
-    "db:logs": "docker compose logs -f postgres"
+    "db:logs": "docker compose logs -f postgres",
+    "db:migrate": "pnpm --filter @product-intelligence-agent/api exec typeorm-ts-node-commonjs -d src/data-source.ts migration:run",
+    "db:migrate:revert": "pnpm --filter @product-intelligence-agent/api exec typeorm-ts-node-commonjs -d src/data-source.ts migration:revert"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.6",

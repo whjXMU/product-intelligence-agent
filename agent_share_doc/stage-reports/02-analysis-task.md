@@ -258,4 +258,66 @@ pnpm --filter @product-intelligence-agent/api test
 - 本次没有修改 `packages/agent-mvp/**`；
 - 本次没有修改 `docs/mvp-subagent-docs/**`；
 - 本次没有修改 `apps/web/src/**`；
+
+## 前端子窗口完成记录
+
+完成时间：2026-06-22
+
+完成内容：
+
+- 将首页升级为阶段 02 任务工作台，并引入 Vue Router；
+- `App.vue` 仅保留 `AppLayout`，`AppLayout` 挂载 `<RouterView />`；
+- 新增 `app/router` 应用路由层：
+  - `index.ts` 创建 router；
+  - `routes.ts` 汇总根路由；
+  - `routeModules.ts` 使用 `import.meta.glob` 自动汇总 `views/**/routes.ts`；
+  - `types.ts` 定义可选 `disabled` 的本地路由类型；
+- 新增 `views/analysis-tasks` 业务视图模块，模块内聚路由、页面、任务 API、composables、组件和业务展示工具；
+- 新增路由页面：
+  - `/analysis-tasks`：任务工作台；
+  - `/analysis-tasks/:id`：任务详情和 mock 报告；
+- 新增跨业务 shared 层：
+  - `shared/api/http.ts`：通用 HTTP 请求；
+  - `shared/utils/date.ts`：通用日期格式化；
+  - `shared/utils/error.ts`：通用错误格式化；
+  - `shared/system/**`：health check API、composable 和状态条组件；
+- 新增任务工作台组件：
+  - `AnalysisTaskCreateForm.vue`
+  - `AnalysisTaskList.vue`
+  - `AnalysisTaskDetailPanel.vue`
+- 新增任务展示工具函数 `analysisTaskDisplay.ts`，集中处理日期、状态文案和 mock result/trace 类型收窄；
+- 保留 health check 状态，并弱化为底部状态条；
+- 新增竞品分析任务创建表单；
+- 新增任务列表，支持刷新和点击进入详情路由；
+- 新增任务详情页，展示任务输入、状态、分析目标；
+- 新增 mock 报告展示，覆盖 summary、定位对比、优势、机会点、建议和 trace；
+- 接入后端 analysis-tasks API：
+  - `POST /analysis-tasks`
+  - `GET /analysis-tasks`
+  - `GET /analysis-tasks/:id`
+  - `POST /analysis-tasks/:id/run-mock`
+- 前端请求和状态使用 `packages/shared` 导出的 DTO 类型；
+- 更新 `apps/web/src/style.css`，将页面调整为工作台布局。
+
+验证结果：
+
+```bash
+pnpm --filter @product-intelligence-agent/web typecheck
+pnpm --filter @product-intelligence-agent/web build
+pnpm lint
+pnpm typecheck
+```
+
+以上命令均已通过。
+
+说明：
+
+- 本次没有执行 `pnpm install`；
+- 本次没有修改 `packages/agent-mvp/**`；
+- 本次没有修改 `docs/mvp-subagent-docs/**`；
+- 本次没有修改后端 entity/migration；
+- 本次没有修改 shared DTO。
+
+待联调事项：
+
 - 数据库容器和实际 migration 执行未在本窗口验证，需后续结合 `pnpm db:up` 和 API 启动做联调。

@@ -30,6 +30,7 @@ export interface AnalysisTaskTrace {
   steps: AnalysisTaskTraceStep[];
 }
 
+// 创建请求DTO-前端传递的数据
 export interface CreateAnalysisTaskRequest {
   title: string;
   productName: string;
@@ -39,6 +40,7 @@ export interface CreateAnalysisTaskRequest {
   input: AnalysisTaskInput;
 }
 
+// 后端返回的数据
 export interface AnalysisTaskDto {
   id: string;
   title: string;
@@ -55,6 +57,7 @@ export interface AnalysisTaskDto {
   updatedAt: string;
 }
 
+// 任务列表项DTO
 export type AnalysisTaskListItemDto = Pick<
   AnalysisTaskDto,
   | 'id'
