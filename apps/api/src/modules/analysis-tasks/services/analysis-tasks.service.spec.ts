@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { AnalysisTaskEntity } from './analysis-task.entity';
+import { AnalysisTaskEntity } from '../entities/analysis-task.entity';
 import { AnalysisTasksService } from './analysis-tasks.service';
 
 interface MockRepository {

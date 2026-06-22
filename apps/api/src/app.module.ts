@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AnalysisTasksModule } from './analysis-tasks/analysis-tasks.module';
 import { getTypeOrmModuleOptions } from './database/typeorm-options';
-import { HealthModule } from './health/health.module';
+import { AnalysisTasksModule } from './modules/analysis-tasks/analysis-tasks.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [

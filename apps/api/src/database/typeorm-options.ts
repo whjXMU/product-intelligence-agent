@@ -1,7 +1,7 @@
 import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import type { DataSourceOptions } from 'typeorm';
-import { AnalysisTaskEntity } from '../analysis-tasks/analysis-task.entity';
 import { getDatabaseConfig } from '../config/database.config';
+import { AnalysisTaskEntity } from '../modules/analysis-tasks/entities/analysis-task.entity';
 
 const migrationsGlob = '../../database/migrations/*{.ts,.js}';
 

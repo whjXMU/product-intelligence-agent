@@ -4,7 +4,7 @@ import type {
   AnalysisTaskListItemDto,
   CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared';
-import { AnalysisTasksService } from './analysis-tasks.service';
+import { AnalysisTasksService } from '../services/analysis-tasks.service';
 
 @Controller('analysis-tasks')
 export class AnalysisTasksController {

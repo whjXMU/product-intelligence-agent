@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AnalysisTaskEntity } from './analysis-task.entity';
-import { AnalysisTasksController } from './analysis-tasks.controller';
-import { AnalysisTasksService } from './analysis-tasks.service';
+import { AnalysisTasksController } from './controllers/analysis-tasks.controller';
+import { AnalysisTaskEntity } from './entities/analysis-task.entity';
+import { AnalysisTasksService } from './services/analysis-tasks.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([AnalysisTaskEntity])],

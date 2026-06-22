@@ -12,7 +12,7 @@ import type {
   CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared';
 import { Repository } from 'typeorm';
-import { AnalysisTaskEntity } from './analysis-task.entity';
+import { AnalysisTaskEntity } from '../entities/analysis-task.entity';
 
 @Injectable()
 export class AnalysisTasksService {
