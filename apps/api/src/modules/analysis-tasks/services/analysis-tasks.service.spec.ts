@@ -2,6 +2,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AnalysisTaskEntity } from '../entities/analysis-task.entity';
+import { AnalysisTaskMockRunnerService } from './analysis-task-mock-runner.service';
 import { AnalysisTasksService } from './analysis-tasks.service';
 
 interface MockRepository {
@@ -36,6 +37,7 @@ const baseTask = (
 describe('AnalysisTasksService', () => {
   let service: AnalysisTasksService;
   let repository: jest.Mocked<MockRepository>;
+  let mockRunner: jest.Mocked<Pick<AnalysisTaskMockRunnerService, 'run'>>;
 
   beforeEach(async () => {
     repository = {
@@ -51,10 +53,37 @@ describe('AnalysisTasksService', () => {
       find: jest.fn(() => Promise.resolve([baseTask()])),
       findOne: jest.fn(() => Promise.resolve(baseTask())),
     };
+    mockRunner = {
+      run: jest.fn((task: AnalysisTaskEntity) => ({
+        result: {
+          summary: `${task.productName} 与 ${task.competitorName} 的 mock 竞品分析已生成。`,
+          positioningComparison: [],
+          strengths: [],
+          opportunities: [],
+          recommendations: [],
+          generatedAt: '2026-06-22T00:02:00.000Z',
+        },
+        trace: {
+          mode: 'mock',
+          steps: [
+            {
+              name: 'generate_mock_report',
+              status: 'completed',
+              message: '生成 mock 分析报告和建议。',
+              timestamp: '2026-06-22T00:02:00.000Z',
+            },
+          ],
+        },
+      })),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AnalysisTasksService,
+        {
+          provide: AnalysisTaskMockRunnerService,
+          useValue: mockRunner,
+        },
         {
           provide: getRepositoryToken(AnalysisTaskEntity),
           useValue: repository,
@@ -128,6 +157,12 @@ describe('AnalysisTasksService', () => {
     expect(repository.findOne).toHaveBeenCalledWith({
       where: { id: 'task-1' },
     });
+    expect(mockRunner.run).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'task-1',
+        status: 'running',
+      }),
+    );
     expect(repository.save).toHaveBeenCalledTimes(2);
 
     const firstSavedTask = repository.save.mock.calls[0]?.[0];
