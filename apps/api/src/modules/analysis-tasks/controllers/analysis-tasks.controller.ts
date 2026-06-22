@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import {
   createAnalysisTaskRequestSchema,
   type AnalysisTaskDto,
@@ -26,12 +33,16 @@ export class AnalysisTasksController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<AnalysisTaskDto> {
+  async findOne(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<AnalysisTaskDto> {
     return this.analysisTasksService.findOne(id);
   }
 
   @Post(':id/run-mock')
-  async runMock(@Param('id') id: string): Promise<AnalysisTaskDto> {
+  async runMock(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<AnalysisTaskDto> {
     return this.analysisTasksService.runMock(id);
   }
 }

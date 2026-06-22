@@ -1,4 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AnalysisTaskEntity } from '../entities/analysis-task.entity';
@@ -169,6 +172,24 @@ describe('AnalysisTasksService', () => {
     expect(task.status).toBe('completed');
     expect(task.result).not.toBeNull();
     expect(typeof task.result?.generatedAt).toBe('string');
+  });
+
+  it('marks the task as failed when mock runner throws', async () => {
+    mockRunner.run.mockImplementationOnce(() => {
+      throw new Error('mock runner failed');
+    });
+
+    await expect(service.runMock('task-1')).rejects.toBeInstanceOf(
+      InternalServerErrorException,
+    );
+
+    expect(repository.save).toHaveBeenCalledTimes(2);
+
+    const failedTask = repository.save.mock.calls[1]?.[0];
+    expect(failedTask).toMatchObject({
+      status: 'failed',
+      errorMessage: 'mock runner failed',
+    });
   });
 
   it('throws when a task cannot be found', async () => {

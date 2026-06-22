@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type {
   AnalysisTaskDto,
@@ -59,16 +63,36 @@ export class AnalysisTasksService {
       errorMessage: null,
     });
 
-    const { result, trace } = this.mockRunner.run(runningTask);
+    try {
+      const { result, trace } = this.mockRunner.run(runningTask);
 
-    return toAnalysisTaskDto(
+      return toAnalysisTaskDto(
+        await this.analysisTasksRepository.save({
+          ...runningTask,
+          status: 'completed',
+          result,
+          trace,
+        }),
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown mock runner error';
+
       await this.analysisTasksRepository.save({
         ...runningTask,
-        status: 'completed',
-        result,
-        trace,
-      }),
-    );
+        status: 'failed',
+        errorMessage,
+      });
+
+      throw new InternalServerErrorException({
+        code: 'ANALYSIS_TASK_RUN_FAILED',
+        message: 'Failed to run mock analysis task',
+        details: {
+          taskId: runningTask.id,
+          errorMessage,
+        },
+      });
+    }
   }
 
   private async findEntityById(id: string): Promise<AnalysisTaskEntity> {

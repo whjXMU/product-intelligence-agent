@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { getAppConfig } from './config/app.config';
 
 async function bootstrap() {
@@ -8,6 +9,7 @@ async function bootstrap() {
   app.enableCors({
     origin: appConfig.webOrigin,
   });
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(appConfig.port);
 }
