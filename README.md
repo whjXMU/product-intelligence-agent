@@ -53,9 +53,11 @@ pnpm install
 ```
 
 启动数据库：
+（先开启docker app）
 
 ```bash
 pnpm db:up
+pnpm db:migrate
 ```
 
 启动后端：

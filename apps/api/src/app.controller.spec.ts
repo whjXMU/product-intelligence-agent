@@ -15,8 +15,10 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getRoot()).toContain('Agent API');
+    it('should return API startup message', () => {
+      expect(appController.getRoot()).toContain(
+        'product-intelligence-agent API',
+      );
     });
   });
 });

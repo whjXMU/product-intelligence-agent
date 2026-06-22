@@ -15,9 +15,14 @@
 - 不接入真实 LLM；
 - 不引入队列、多 Agent 或 RAG。
 
-## 启动
+## 启动步骤
+
+1. 开启本机docker
+2. 执行以下命令
 
 ```bash
+pnpm db:up
+pnpm db:migrate
 pnpm dev:api
 ```
 
