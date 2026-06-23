@@ -8,8 +8,10 @@ import {
 import type {
   AnalysisTaskInput,
   AnalysisTaskMockResult,
+  AnalysisTaskResultV1,
   AnalysisTaskSourceType,
   AnalysisTaskStatus,
+  AgentTraceV1,
   AnalysisTaskTrace,
 } from '@product-intelligence-agent/shared';
 
@@ -40,10 +42,14 @@ export class AnalysisTaskEntity {
   status!: AnalysisTaskStatus;
 
   @Column({ type: 'jsonb', nullable: true })
-  result!: AnalysisTaskMockResult | Record<string, unknown> | null;
+  result!:
+    | AnalysisTaskMockResult
+    | AnalysisTaskResultV1
+    | Record<string, unknown>
+    | null;
 
   @Column({ type: 'jsonb', nullable: true })
-  trace!: AnalysisTaskTrace | Record<string, unknown> | null;
+  trace!: AnalysisTaskTrace | AgentTraceV1 | Record<string, unknown> | null;
 
   @Column({ name: 'error_message', type: 'text', nullable: true })
   errorMessage!: string | null;

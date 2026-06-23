@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@product-intelligence-agent/shared": "workspace:*",
+    "@product-intelligence-agent/agent-core": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
@@ -65,7 +66,19 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "module": "CommonJS",
+            "moduleResolution": "node",
+            "resolvePackageJsonExports": false
+          }
+        }
+      ]
+    },
+    "moduleNameMapper": {
+      "^@product-intelligence-agent/shared$": "<rootDir>/test/shared.ts"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

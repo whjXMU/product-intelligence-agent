@@ -494,3 +494,288 @@ analysis_task_artifacts
 - schema 是阶段 03 的地基；
 - API 和前端都依赖它；
 - 一旦 schema 设计不好，后面会产生大量返工。
+
+## 子窗口 A 完成记录
+
+执行日期：2026-06-23
+
+执行范围：
+
+- 在 `packages/shared/src/analysis-task.ts` 新增正式版本化 schema：
+  - `AnalysisTaskInputV1`
+  - `AnalysisTaskResultV1`
+  - `AgentTraceV1`
+- 在 `packages/agent-core/src/contracts.ts` 新增正式 workflow contract：
+  - `AgentWorkflowMode`
+  - `AgentWorkflowRunInput`
+  - `AgentWorkflowRunOutput`
+  - `AgentWorkflow`
+
+阶段 02 兼容方式：
+
+- 保留原有 `analysisTaskInputSchema` 的宽松 passthrough 行为；
+- 保留原有 `AnalysisTaskMockResult` 和 `AnalysisTaskTrace`；
+- `AnalysisTaskDto.result` 同时兼容旧 mock result、新 `AnalysisTaskResultV1` 和宽松 `Record<string, unknown>`；
+- `AnalysisTaskDto.trace` 同时兼容旧 mock trace、新 `AgentTraceV1` 和宽松 `Record<string, unknown>`；
+- 未修改阶段 02 API controller、service 或前端页面。
+
+边界确认：
+
+- 未实现 API controller；
+- 未实现 deterministic runner；
+- 未接入真实 LLM；
+- 未改前端页面；
+- 未调用或修改 `packages/agent-mvp`；
+- `packages/agent-core` 仍保持为空壳 contract 层，只定义正式 workflow 的调用约定。
+
+已执行验证：
+
+```bash
+pnpm --filter @product-intelligence-agent/shared typecheck
+pnpm --filter @product-intelligence-agent/agent-core typecheck
+pnpm typecheck
+```
+
+验证结果：全部通过。
+
+后续建议：
+
+- 子窗口 B 可以在此基础上实现 deterministic competitive analysis runner；
+- API 接入时应使用 `AnalysisTaskInputV1` 校验 workflow 输入，并将输出写入 `AnalysisTaskResultV1` 和 `AgentTraceV1`；
+- 前端适配应在 API 输出稳定后再启动。
+
+## 总控复查记录：子窗口 A
+
+复查日期：2026-06-23
+
+总控结论：
+
+- 子窗口 A 的实现符合阶段 03 架构目标；
+- `packages/shared` 已提供版本化 schema，并保留阶段 02 mock result/trace 兼容；
+- `packages/agent-core` 已提供纯 workflow contract，没有依赖 Nest、TypeORM、Vue；
+- 未发现 `packages/agent-mvp` 被正式代码依赖；
+- 当前可以进入子窗口 B：API workflow 接入。
+
+总控验证命令：
+
+```bash
+pnpm --filter @product-intelligence-agent/shared typecheck
+pnpm --filter @product-intelligence-agent/agent-core typecheck
+pnpm typecheck
+pnpm lint
+pnpm build
+```
+
+验证结果：全部通过。
+
+进入子窗口 B 前的要求：
+
+- 不修改 schema，除非发现必须修正的阻塞问题；
+- 不接真实 LLM；
+- 不新增队列；
+- 不新增 `analysis_task_runs` 表；
+- 新增的 runner 必须输出 `AnalysisTaskResultV1` 和 `AgentTraceV1`；
+- 保留阶段 02 的 `run-mock` 兼容入口。
+
+## 子窗口 B 完成记录
+
+执行日期：2026-06-23
+
+执行范围：
+
+- 在 API 层新增 deterministic competitive analysis workflow runner；
+- 新增 `POST /analysis-tasks/:id/run-workflow`；
+- `run-workflow` 读取现有 `analysis_tasks` 聚合根，不新增运行历史表；
+- 将阶段 02 的宽松任务 input 映射并校验为 `AnalysisTaskInputV1`；
+- 调用 deterministic runner，输出并持久化 `AnalysisTaskResultV1` 和 `AgentTraceV1`；
+- 保留 `POST /analysis-tasks/:id/run-mock` 作为阶段 02 兼容入口；
+- 补充 service、controller 和 runner 单元测试；
+- 为 API Jest 单测增加 workspace shared TS 源码映射，避免 ESM `dist` 在 CommonJS Jest 环境中解析失败。
+
+实现文件：
+
+- `apps/api/src/modules/analysis-tasks/workflow/runner.service.ts`
+- `apps/api/src/modules/analysis-tasks/workflow/runner.service.spec.ts`
+- `apps/api/src/modules/analysis-tasks/workflow/trace.factory.ts`
+- `apps/api/src/modules/analysis-tasks/workflow/trace.factory.spec.ts`
+- `apps/api/src/modules/analysis-tasks/domain/task-status.ts`
+- `apps/api/src/modules/analysis-tasks/domain/task-status.spec.ts`
+- `apps/api/src/modules/analysis-tasks/mappers/workflow-input.mapper.ts`
+- `apps/api/src/modules/analysis-tasks/mappers/workflow-input.mapper.spec.ts`
+- `apps/api/src/modules/analysis-tasks/services/analysis-tasks.service.ts`
+- `apps/api/src/modules/analysis-tasks/services/analysis-tasks.service.spec.ts`
+- `apps/api/src/modules/analysis-tasks/controllers/analysis-tasks.controller.ts`
+- `apps/api/src/modules/analysis-tasks/controllers/analysis-tasks.controller.spec.ts`
+- `apps/api/src/modules/analysis-tasks/entities/analysis-task.entity.ts`
+- `apps/api/src/modules/analysis-tasks/analysis-tasks.module.ts`
+- `apps/api/src/test/shared.ts`
+- `apps/api/package.json`
+- `pnpm-lock.yaml`
+
+状态流转：
+
+```text
+created / completed / failed
+  └── run-workflow → running
+
+running
+  ├── success → completed
+  └── error   → failed
+```
+
+约束：
+
+- `running` 状态下重复调用 `run-workflow` 会返回冲突错误；
+- 重新运行会先清空旧 `result`、`trace` 和 `errorMessage`，成功后写入最新 V1 result/trace；
+- workflow input 映射或 runner 执行失败时，任务会落到 `failed`，并写入 `AgentTraceV1` failed trace；
+- 当前仍是同步 API，不引入队列。
+
+V1 schema 对齐：
+
+- runner 输出的 `result.schemaVersion` 为 `analysis_task_result.v1`；
+- runner 输出的 `trace.schemaVersion` 为 `agent_trace.v1`；
+- `result.workflow.workflowId` 与 `trace.workflowId` 均为 `competitive_analysis.v1`；
+- `result.workflow.runId` 与 `trace.runId` 保持一致；
+- deterministic runner 不产生真实模型调用，`modelCalls`、`toolCalls`、`guardrails`、`artifacts` 当前为空数组；
+- 单元测试直接使用 `analysisTaskResultV1Schema` 和 `agentTraceV1Schema` 校验 runner 输出。
+
+边界确认：
+
+- 未接真实 LLM；
+- 未调用或修改 `packages/agent-mvp`；
+- 未新增队列；
+- 未新增 `analysis_task_runs` 表；
+- 未修改前端页面；
+- 未修改 shared schema；
+- 仅为 API 包新增 `@product-intelligence-agent/agent-core` workspace 依赖，用于引用正式 workflow contract。
+
+已执行验证：
+
+```bash
+pnpm --filter @product-intelligence-agent/api test -- analysis-tasks
+pnpm --filter @product-intelligence-agent/api typecheck
+pnpm --filter @product-intelligence-agent/api lint
+pnpm --filter @product-intelligence-agent/api build
+```
+
+验证结果：全部通过。
+
+后续建议：
+
+- 可以开启子窗口 C，在前端展示 `AnalysisTaskResultV1` 和 `AgentTraceV1` 的关键字段；
+- 后续真实 Agent 接入时，应替换 runner 内部实现，而不是改变 `run-workflow` 的业务入口和 V1 持久化边界。
+
+## 子窗口 B 架构整理与收口说明
+
+整理日期：2026-06-23
+
+整理背景：
+
+- 子窗口 B 初版已完成 API 接入，但 `AnalysisTasksService` 一度承担了过多职责；
+- 为避免为了阶段验收留下架构债，后续按小步方式进行了结构整理；
+- 每一步只处理一个耦合点，避免引入过度抽象。
+
+已完成整理：
+
+- 将 `AnalysisTaskEntity` 到 `AnalysisTaskInputV1` 的转换独立为 `mappers/workflow-input.mapper.ts`；
+- 将 failed `AgentTraceV1` 构造独立为 `workflow/trace.factory.ts`；
+- 将 `analysis_tasks.status` 的业务规则独立为 `domain/task-status.ts`；
+- 将 service 内部的状态持久化写入收敛为 `markRunning`、`markCompleted`、`markFailed` 私有方法；
+- 将 workflow 相关文件命名收敛为较短的 `workflow/runner.service.ts`、`workflow/trace.factory.ts`；
+- 保持 controller 轻薄，只负责 HTTP 路由和参数；
+- 保持 domain 纯净，不依赖 Nest，也不抛 HTTP 异常；
+- service 仍负责 application 编排和 HTTP 异常翻译。
+
+当前 API 模块分层：
+
+```text
+controllers/
+  analysis-tasks.controller.ts
+
+services/
+  analysis-tasks.service.ts
+  analysis-task-mock-runner.service.ts
+
+domain/
+  task-status.ts
+
+mappers/
+  analysis-task.mapper.ts
+  workflow-input.mapper.ts
+
+workflow/
+  runner.service.ts
+  trace.factory.ts
+```
+
+边界判断：
+
+- `analysis_tasks.status` 是用户可见的业务任务生命周期，属于 analysis task domain，不放入 agent-core；
+- `AgentTraceV1.status` 和 `steps[].status` 是 Agent workflow 执行可观测状态，后续应由 Agent workflow/orchestrator 负责；
+- 当前 `workflow/runner.service.ts` 是 API 阶段的 deterministic adapter，负责验证 API 到 workflow 的接入边界；
+- 后续真实 Agent 开发阶段应评估将 runner 的纯核心迁入 `packages/agent-core` 或正式 workflow package，API 仅保留 Nest adapter。
+
+当前不继续在子窗口 B 内处理的事项：
+
+- 不迁移 runner 到 `packages/agent-core`；
+- 不引入 workflow registry；
+- 不接真实 LLM；
+- 不引入 model provider、tool registry、memory 或 guardrails；
+- 不新增队列；
+- 不新增 `analysis_task_runs`；
+- 不修改前端页面。
+
+原因：
+
+- runner 归属涉及正式 Agent workflow/core 的组织方式，应该交给下一阶段 Agent 子窗口统一设计；
+- API 子窗口继续提前迁移 runner，容易替 Agent 层过早定型；
+- 当前 API 目标是稳定 `run-workflow` 业务入口、持久化 V1 result/trace、保留清晰边界。
+
+整理后验证：
+
+```bash
+pnpm --filter @product-intelligence-agent/api test -- analysis-tasks
+pnpm --filter @product-intelligence-agent/api typecheck
+pnpm --filter @product-intelligence-agent/api lint
+```
+
+验证结果：全部通过。
+
+## 给总控主窗口的文字版总结
+
+阶段 03 子窗口 B 已完成 API workflow 接入，并完成必要架构整理，可以收口。
+
+本窗口交付内容：
+
+- 新增 `POST /analysis-tasks/:id/run-workflow`；
+- `run-workflow` 读取 `analysis_tasks`，将任务输入映射并校验为 `AnalysisTaskInputV1`；
+- 调用 API 内 deterministic workflow runner；
+- 成功时持久化 `AnalysisTaskResultV1` 和 `AgentTraceV1`；
+- 失败时持久化 failed `AgentTraceV1` 和 `errorMessage`；
+- 保留 `POST /analysis-tasks/:id/run-mock` 兼容入口；
+- 补充 controller、service、mapper、domain、trace factory、runner 测试。
+
+整理后的架构边界：
+
+- controller 保持 HTTP 入口职责；
+- service 负责 application 编排、数据库读写和 HTTP 异常翻译；
+- domain 只承载 analysis task 业务状态规则；
+- mapper 负责 `AnalysisTaskEntity -> AnalysisTaskInputV1`；
+- workflow 目录承载当前 API 阶段的 deterministic runner 和 trace factory；
+- shared 提供 V1 schema；
+- agent-core 当前仍只提供 workflow contract；
+- 未调用或修改 `packages/agent-mvp`。
+
+需要总控注意的后续事项：
+
+- 当前 runner 仍在 API 模块内，定位是阶段 03 deterministic adapter；
+- 下一阶段进入 Agent 开发时，应由 Agent 子窗口评估 runner 核心是否迁入 `packages/agent-core` 或正式 workflow package；
+- 不建议在 API 子窗口继续推进 runner 迁移，以免提前替 Agent 层定型；
+- `analysis_tasks.status` 和 Agent workflow 内部 step status 已明确分层：前者属于业务任务生命周期，后者属于 Agent workflow/orchestrator；
+- API 入口和 V1 result/trace 持久化边界已经稳定，可作为后续 Agent runner 替换的接入点。
+
+建议下一步：
+
+- 总控进入 Agent 开发阶段，开启新的 Agent 子窗口；
+- Agent 子窗口优先设计正式 workflow runner/core 的包内组织、model provider 边界、tool/trace/eval 接入方式；
+- 前端展示适配可以在 API V1 输出稳定的基础上并行或随后推进，但不应阻塞 Agent core 设计。

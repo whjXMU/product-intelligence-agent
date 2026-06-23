@@ -1,10 +1,18 @@
 import {
+  BadRequestException,
+  ConflictException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import type {
+  AgentTraceV1,
+  AnalysisTaskInputV1,
+  AnalysisTaskResultV1,
+} from '@product-intelligence-agent/shared';
 import { AnalysisTaskEntity } from '../entities/analysis-task.entity';
+import { WorkflowRunnerService } from '../workflow/runner.service';
 import { AnalysisTaskMockRunnerService } from './analysis-task-mock-runner.service';
 import { AnalysisTasksService } from './analysis-tasks.service';
 
@@ -41,6 +49,9 @@ describe('AnalysisTasksService', () => {
   let service: AnalysisTasksService;
   let repository: jest.Mocked<MockRepository>;
   let mockRunner: jest.Mocked<Pick<AnalysisTaskMockRunnerService, 'run'>>;
+  let workflowRunner: jest.Mocked<
+    Pick<WorkflowRunnerService, 'id' | 'run' | 'version'>
+  >;
 
   beforeEach(async () => {
     repository = {
@@ -79,6 +90,13 @@ describe('AnalysisTasksService', () => {
         },
       })),
     };
+    workflowRunner = {
+      id: 'competitive_analysis.v1',
+      version: '2026-06-23.deterministic.v1',
+      run: jest.fn(({ taskId, input, startedAt }) =>
+        Promise.resolve(createWorkflowRunOutput(taskId, input, startedAt)),
+      ),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -86,6 +104,10 @@ describe('AnalysisTasksService', () => {
         {
           provide: AnalysisTaskMockRunnerService,
           useValue: mockRunner,
+        },
+        {
+          provide: WorkflowRunnerService,
+          useValue: workflowRunner,
         },
         {
           provide: getRepositoryToken(AnalysisTaskEntity),
@@ -174,6 +196,131 @@ describe('AnalysisTasksService', () => {
     expect(typeof task.result?.generatedAt).toBe('string');
   });
 
+  it('runs deterministic workflow and persists V1 result and trace', async () => {
+    const task = await service.runWorkflow('task-1');
+
+    expect(repository.findOne).toHaveBeenCalledWith({
+      where: { id: 'task-1' },
+    });
+    const workflowRunInput = workflowRunner.run.mock.calls[0]?.[0];
+    expect(workflowRunInput).toMatchObject({
+      taskId: 'task-1',
+      mode: 'deterministic',
+    });
+    expect(workflowRunInput?.input).toMatchObject({
+      schemaVersion: 'analysis_task_input.v1',
+      subject: {
+        productName: 'OpenAI',
+        competitorNames: ['DeepSeek'],
+      },
+    });
+    expect(repository.save).toHaveBeenCalledTimes(2);
+
+    const firstSavedTask = repository.save.mock.calls[0]?.[0];
+    const secondSavedTask = repository.save.mock.calls[1]?.[0];
+
+    expect(firstSavedTask).toMatchObject({
+      status: 'running',
+      result: null,
+      trace: null,
+      errorMessage: null,
+    });
+    expect(secondSavedTask).toMatchObject({
+      status: 'completed',
+      errorMessage: null,
+      result: {
+        schemaVersion: 'analysis_task_result.v1',
+      },
+      trace: {
+        schemaVersion: 'agent_trace.v1',
+        mode: 'deterministic',
+        status: 'completed',
+      },
+    });
+    expect(task.status).toBe('completed');
+    expect(task.result).toMatchObject({
+      schemaVersion: 'analysis_task_result.v1',
+    });
+    expect(task.trace).toMatchObject({
+      schemaVersion: 'agent_trace.v1',
+    });
+  });
+
+  it('rejects workflow runs when a task is already running', async () => {
+    repository.findOne.mockResolvedValueOnce(baseTask({ status: 'running' }));
+
+    await expect(service.runWorkflow('task-1')).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+
+    expect(workflowRunner.run).not.toHaveBeenCalled();
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('rejects mock runs when a task is already running', async () => {
+    repository.findOne.mockResolvedValueOnce(baseTask({ status: 'running' }));
+
+    await expect(service.runMock('task-1')).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+
+    expect(mockRunner.run).not.toHaveBeenCalled();
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('marks the task as failed when workflow input cannot be mapped to V1', async () => {
+    repository.findOne.mockResolvedValueOnce(
+      baseTask({
+        input: {
+          selfUrl: 'not-a-valid-url',
+          competitorUrl: 'https://deepseek.com',
+        },
+      }),
+    );
+
+    await expect(service.runWorkflow('task-1')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+
+    expect(workflowRunner.run).not.toHaveBeenCalled();
+    expect(repository.save).toHaveBeenCalledTimes(2);
+
+    const failedTask = repository.save.mock.calls[1]?.[0];
+    expect(failedTask).toMatchObject({
+      status: 'failed',
+      trace: {
+        schemaVersion: 'agent_trace.v1',
+        mode: 'deterministic',
+        status: 'failed',
+      },
+    });
+  });
+
+  it('marks the task as failed when deterministic workflow runner throws', async () => {
+    workflowRunner.run.mockRejectedValueOnce(new Error('workflow failed'));
+
+    await expect(service.runWorkflow('task-1')).rejects.toBeInstanceOf(
+      InternalServerErrorException,
+    );
+
+    expect(repository.save).toHaveBeenCalledTimes(2);
+
+    const failedTask = repository.save.mock.calls[1]?.[0];
+    expect(failedTask).toMatchObject({
+      status: 'failed',
+      errorMessage: 'workflow failed',
+      trace: {
+        schemaVersion: 'agent_trace.v1',
+        mode: 'deterministic',
+        status: 'failed',
+        error: {
+          code: 'ANALYSIS_TASK_WORKFLOW_RUN_FAILED',
+          message: 'workflow failed',
+        },
+      },
+    });
+  });
+
   it('marks the task as failed when mock runner throws', async () => {
     mockRunner.run.mockImplementationOnce(() => {
       throw new Error('mock runner failed');
@@ -200,3 +347,98 @@ describe('AnalysisTasksService', () => {
     );
   });
 });
+
+function createWorkflowRunOutput(
+  taskId: string,
+  input: AnalysisTaskInputV1,
+  startedAt: string,
+): {
+  result: AnalysisTaskResultV1;
+  trace: AgentTraceV1;
+} {
+  const generatedAt = '2026-06-22T00:02:00.000Z';
+  const runId = `competitive_analysis_${taskId}_${Date.parse(startedAt)}`;
+
+  return {
+    result: {
+      schemaVersion: 'analysis_task_result.v1',
+      generatedAt,
+      workflow: {
+        workflowId: 'competitive_analysis.v1',
+        workflowVersion: '2026-06-23.deterministic.v1',
+        runId,
+      },
+      executiveSummary: {
+        oneLine: `${input.subject.productName} workflow result`,
+        keyFindings: ['确定性 workflow 已生成分析结果。'],
+        confidence: 'medium',
+      },
+      comparisonDimensions: [
+        {
+          id: 'positioning',
+          name: '定位表达',
+          selfAssessment: '自有产品定位评估。',
+          competitorAssessment: '竞品定位评估。',
+          gap: '定位表达存在差距。',
+          evidenceRefs: [],
+        },
+      ],
+      opportunities: [
+        {
+          id: 'opportunity',
+          title: '优化机会',
+          rationale: '基于任务输入生成机会点。',
+          impact: 'medium',
+          effort: 'low',
+          evidenceRefs: [],
+        },
+      ],
+      recommendations: [
+        {
+          id: 'recommendation',
+          title: '需求建议',
+          description: '基于任务输入生成需求建议。',
+          priority: 'p1',
+          evidenceRefs: [],
+        },
+      ],
+      quality: {
+        passed: true,
+        score: 0.86,
+        checks: [
+          {
+            name: 'schema',
+            passed: true,
+            message: '结果符合 V1 schema。',
+          },
+        ],
+      },
+    },
+    trace: {
+      schemaVersion: 'agent_trace.v1',
+      runId,
+      taskId,
+      workflowId: 'competitive_analysis.v1',
+      workflowVersion: '2026-06-23.deterministic.v1',
+      mode: 'deterministic',
+      status: 'completed',
+      startedAt,
+      endedAt: generatedAt,
+      steps: [
+        {
+          stepId: 'input_normalization',
+          name: 'Normalize input',
+          kind: 'input_normalization',
+          status: 'completed',
+          startedAt,
+          endedAt: generatedAt,
+          summary: '输入已标准化。',
+        },
+      ],
+      modelCalls: [],
+      toolCalls: [],
+      guardrails: [],
+      artifacts: [],
+    },
+  };
+}

@@ -45,4 +45,11 @@ export class AnalysisTasksController {
   ): Promise<AnalysisTaskDto> {
     return this.analysisTasksService.runMock(id);
   }
+
+  @Post(':id/run-workflow')
+  async runWorkflow(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<AnalysisTaskDto> {
+    return this.analysisTasksService.runWorkflow(id);
+  }
 }

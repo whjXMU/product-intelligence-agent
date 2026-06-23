@@ -30,3 +30,25 @@ export interface AgentTraceEvent {
   status: 'running' | 'success' | 'failed';
   metadata?: Record<string, unknown>;
 }
+
+export type AgentWorkflowMode = 'mock' | 'deterministic' | 'llm';
+
+export interface AgentWorkflowRunInput<Input> {
+  taskId: string;
+  input: Input;
+  startedAt: string;
+  mode: AgentWorkflowMode;
+}
+
+export interface AgentWorkflowRunOutput<Result, Trace> {
+  result: Result;
+  trace: Trace;
+}
+
+export interface AgentWorkflow<Input, Result, Trace> {
+  id: string;
+  version: string;
+  run(
+    input: AgentWorkflowRunInput<Input>,
+  ): Promise<AgentWorkflowRunOutput<Result, Trace>>;
+}

@@ -59,6 +59,8 @@ product-intelligence-agent
 - 2026-06-22：完成阶段 02 前端任务工作台，并将前端实现拆分为 API、composables 和 feature components。
 - 2026-06-23：总控线程完成阶段 02 验收，API、数据库、前端入口、mock 任务闭环和测试均通过。
 - 2026-06-23：开始阶段 03 架构设计，新增正式 workflow schema 和接入方案说明。
+- 2026-06-23：子窗口 A 完成 shared schema 与 agent-core workflow contract，总控复查和 build 验证通过。
+- 2026-06-23：子窗口 B 完成 API workflow 接入，新增 deterministic runner 和 `POST /analysis-tasks/:id/run-workflow`，API 测试、typecheck、lint、build 均通过。
 - 2026-06-22：执行阶段 01.5，开始校准主线文档，把 Agent MVP 验证归档为 spike。
 - 2026-06-22：完成阶段 01.5，补充 handoff、roadmap、architecture、ADR 和 spike 报告定性。
 - 2026-06-22：创建阶段 02 任务说明，明确先做 `analysis_tasks` 业务骨架，再接正式 Agent Workflow。
@@ -75,6 +77,6 @@ product-intelligence-agent
 
 ## 下一步
 
-1. 先开启子窗口 A，完成 shared schema 与 agent-core workflow contract；
-2. schema 稳定后，再开启 API 子窗口接入 deterministic runner；
-3. API 输出稳定后，再开启前端子窗口展示新版 result/trace。
+1. 总控进入 Agent 开发阶段，开启新的 Agent 子窗口；
+2. 新 Agent 子窗口优先设计正式 workflow runner/core 的组织方式，评估当前 API deterministic runner 的纯核心是否迁入 `packages/agent-core` 或正式 workflow package；
+3. 前端展示适配可在 API V1 输出稳定基础上并行或随后推进，展示新版 `AnalysisTaskResultV1` 和 `AgentTraceV1`，并保留 `run-mock` 兼容展示。
