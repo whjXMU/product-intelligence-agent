@@ -779,3 +779,78 @@ pnpm --filter @product-intelligence-agent/api lint
 - 总控进入 Agent 开发阶段，开启新的 Agent 子窗口；
 - Agent 子窗口优先设计正式 workflow runner/core 的包内组织、model provider 边界、tool/trace/eval 接入方式；
 - 前端展示适配可以在 API V1 输出稳定的基础上并行或随后推进，但不应阻塞 Agent core 设计。
+
+## 总控复查记录：子窗口 B
+
+复查日期：2026-06-23
+
+总控结论：
+
+- 子窗口 B 已完成 `POST /analysis-tasks/:id/run-workflow`；
+- controller 保持 HTTP 入口职责，没有堆业务细节；
+- service 负责 application 编排、状态流转、数据库读写和异常翻译；
+- domain 层抽出了任务运行状态规则；
+- mapper 将阶段 02 input 映射并校验为 `AnalysisTaskInputV1`；
+- workflow 目录承载 deterministic runner 和 failed trace factory；
+- runner 输出会通过 `AnalysisTaskResultV1` 和 `AgentTraceV1` schema parse；
+- 未调用或修改 `packages/agent-mvp`；
+- 未新增队列或 `analysis_task_runs` 表；
+- 阶段 03 API 接入边界稳定。
+
+总控验证命令：
+
+```bash
+pnpm --filter @product-intelligence-agent/api test
+pnpm typecheck
+pnpm lint
+pnpm build
+```
+
+验证结果：全部通过。
+
+总控补充判断：
+
+- 子窗口 B 建议下一步进入 Agent 开发，但从阶段 03 完整闭环角度看，仍应先完成前端 V1 result/trace 展示适配；
+- 当前 `run-workflow` 已经是后续真实 Agent runner 的稳定替换点；
+- 下一步建议开启子窗口 C：前端展示适配；
+- 子窗口 C 完成后，阶段 03 可以收口，再进入正式 Agent runner/model provider 设计。
+
+## 子窗口 C 完成记录：前端展示适配
+
+完成日期：2026-06-23
+
+子窗口 C 已完成前端任务详情页对阶段 03 workflow 输出的展示适配。
+
+本窗口交付内容：
+
+- 新增前端 `runWorkflowAnalysisTask` API 封装，调用 `POST /analysis-tasks/:id/run-workflow`；
+- 在任务详情 composable 中新增 `runningWorkflow` 和 `runWorkflow`，保留阶段 02 `runMock` 入口；
+- 在展示工具函数中以 `schemaVersion` 判别 `AnalysisTaskResultV1` 和 `AgentTraceV1`；
+- 保留旧 mock result 和 mock trace 的字段判别与展示兼容；
+- 任务详情页新增 workflow 运行按钮；
+- 展示 `AnalysisTaskResultV1` 的 `executiveSummary`、`comparisonDimensions`、`opportunities`、`recommendations`、`quality`；
+- 展示 `AgentTraceV1` 的 `runId`、`workflowVersion`、`mode/status`、`steps`；
+- 对 `modelCalls`、`toolCalls`、`guardrails` 为空数组的情况提供空状态；
+- 未修改后端 API、shared schema 或 `packages/agent-mvp`。
+
+前端展示边界：
+
+- 正式 workflow result 通过 `schemaVersion === 'analysis_task_result.v1'` 识别；
+- 正式 Agent trace 通过 `schemaVersion === 'agent_trace.v1'` 识别；
+- 旧 mock result 继续通过 `summary`、`recommendations` 等阶段 02 字段识别；
+- 旧 mock trace 继续通过 `mode === 'mock'` 和 `steps` 识别；
+- 组件只负责展示，API 调用在 api 层，执行状态在 composable 层，类型判别和显示文案在 utils 层。
+
+验证命令：
+
+```bash
+pnpm --filter @product-intelligence-agent/web typecheck
+```
+
+验证结果：通过。
+
+后续建议：
+
+- 阶段 03 可以由总控收口；
+- 下一阶段进入正式 Agent runner/model provider 设计时，前端可继续沿用 V1 result/trace 的 `schemaVersion` 判别边界；
+- 如果后续 trace 增加真实 model/tool/guardrail 数据，当前详情页已有展示入口，无需改变 API 接入方式。

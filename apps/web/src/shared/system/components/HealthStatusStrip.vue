@@ -32,5 +32,37 @@ const emit = defineEmits<{
     </button>
   </section>
 
-  <p v-if="errorMessage" class="muted health-error">{{ errorMessage }}</p>
+<p v-if="errorMessage" class="muted health-error">{{ errorMessage }}</p>
 </template>
+
+<style scoped lang="scss">
+.health-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: center;
+  margin-top: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  padding: 14px;
+  color: var(--color-muted);
+  background: var(--color-surface);
+
+  strong {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+}
+
+.health-error {
+  margin: 10px 0 0;
+}
+
+@media (max-width: 900px) {
+  .health-strip {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

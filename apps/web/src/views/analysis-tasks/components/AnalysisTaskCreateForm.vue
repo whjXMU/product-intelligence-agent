@@ -1,41 +1,3 @@
-<script setup lang="ts">
-import { ref } from 'vue'
-import type { CreateAnalysisTaskRequest } from '@product-intelligence-agent/shared'
-
-defineProps<{
-  creating: boolean
-}>()
-
-const emit = defineEmits<{
-  create: [request: CreateAnalysisTaskRequest]
-}>()
-
-const form = ref({
-  title: 'OpenAI 与 DeepSeek 首页竞品分析',
-  productName: 'OpenAI',
-  competitorName: 'DeepSeek',
-  analysisGoal: '比较首页定位、核心卖点、用户转化路径',
-  selfUrl: 'https://openai.com',
-  competitorUrl: 'https://deepseek.com',
-  notes: '当前阶段只保存输入，不抓取网页。',
-})
-
-function submit() {
-  emit('create', {
-    title: form.value.title,
-    productName: form.value.productName,
-    competitorName: form.value.competitorName,
-    analysisGoal: form.value.analysisGoal,
-    sourceType: 'manual',
-    input: {
-      selfUrl: form.value.selfUrl,
-      competitorUrl: form.value.competitorUrl,
-      notes: form.value.notes,
-    },
-  })
-}
-</script>
-
 <template>
   <form class="task-form" @submit.prevent="submit">
     <div class="section-heading">
@@ -87,3 +49,95 @@ function submit() {
     </button>
   </form>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { CreateAnalysisTaskRequest } from '@product-intelligence-agent/shared'
+
+defineProps<{
+  creating: boolean
+}>()
+
+const emit = defineEmits<{
+  create: [request: CreateAnalysisTaskRequest]
+}>()
+
+const form = ref({
+  title: 'OpenAI 与 DeepSeek 首页竞品分析',
+  productName: 'OpenAI',
+  competitorName: 'DeepSeek',
+  analysisGoal: '比较首页定位、核心卖点、用户转化路径',
+  selfUrl: 'https://openai.com',
+  competitorUrl: 'https://deepseek.com',
+  notes: '当前阶段只保存输入，不抓取网页。',
+})
+
+function submit() {
+  emit('create', {
+    title: form.value.title,
+    productName: form.value.productName,
+    competitorName: form.value.competitorName,
+    analysisGoal: form.value.analysisGoal,
+    sourceType: 'manual',
+    input: {
+      selfUrl: form.value.selfUrl,
+      competitorUrl: form.value.competitorUrl,
+      notes: form.value.notes,
+    },
+  })
+}
+</script>
+
+<style scoped lang="scss">
+.task-form {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  padding: 22px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-panel);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  padding: 10px 12px;
+  color: var(--color-text);
+  background: var(--color-surface-soft);
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(23 107 135 / 14%);
+}
+
+@media (max-width: 900px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

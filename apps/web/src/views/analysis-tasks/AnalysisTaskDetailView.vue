@@ -1,3 +1,20 @@
+<template>
+  <section class="page-toolbar">
+    <RouterLink class="ghost-link" to="/analysis-tasks">返回任务工作台</RouterLink>
+  </section>
+
+  <p v-if="detailErrorMessage" class="error">{{ detailErrorMessage }}</p>
+
+  <AnalysisTaskDetailPanel
+    :task="task"
+    :detail-loading="detailLoading"
+    :running-mock="runningMock"
+    :running-workflow="runningWorkflow"
+    @run-mock="runMock"
+    @run-workflow="runWorkflow"
+  />
+</template>
+
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
@@ -5,8 +22,16 @@ import AnalysisTaskDetailPanel from './components/AnalysisTaskDetailPanel.vue'
 import { useAnalysisTaskDetail } from './composables/useAnalysisTaskDetail'
 
 const route = useRoute()
-const { task, detailLoading, runningMock, detailErrorMessage, loadTask, runMock } =
-  useAnalysisTaskDetail()
+const {
+  task,
+  detailLoading,
+  runningMock,
+  runningWorkflow,
+  detailErrorMessage,
+  loadTask,
+  runMock,
+  runWorkflow,
+} = useAnalysisTaskDetail()
 
 const taskId = computed(() => {
   const id = route.params.id
@@ -24,17 +49,31 @@ watch(
 )
 </script>
 
-<template>
-  <section class="page-toolbar">
-    <RouterLink class="ghost-link" to="/analysis-tasks">返回任务工作台</RouterLink>
-  </section>
+<style scoped lang="scss">
+.page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
 
-  <p v-if="detailErrorMessage" class="error">{{ detailErrorMessage }}</p>
+.ghost-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  padding: 0 13px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  font-size: 14px;
+  font-weight: 750;
+  text-decoration: none;
 
-  <AnalysisTaskDetailPanel
-    :task="task"
-    :detail-loading="detailLoading"
-    :running-mock="runningMock"
-    @run-mock="runMock"
-  />
-</template>
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+</style>

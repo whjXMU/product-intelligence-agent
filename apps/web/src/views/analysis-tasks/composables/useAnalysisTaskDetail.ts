@@ -3,6 +3,7 @@ import type { AnalysisTaskDto } from '@product-intelligence-agent/shared'
 import {
   getAnalysisTask,
   runMockAnalysisTask,
+  runWorkflowAnalysisTask,
 } from '../api/analysisTasks.api'
 import { formatUnknownError } from '../../../shared/utils/error'
 
@@ -10,6 +11,7 @@ export function useAnalysisTaskDetail() {
   const task = ref<AnalysisTaskDto | null>(null)
   const detailLoading = ref(false)
   const runningMock = ref(false)
+  const runningWorkflow = ref(false)
   const detailErrorMessage = ref('')
 
   async function loadTask(id: string) {
@@ -41,12 +43,29 @@ export function useAnalysisTaskDetail() {
     }
   }
 
+  async function runWorkflow() {
+    if (!task.value) return
+
+    runningWorkflow.value = true
+    detailErrorMessage.value = ''
+
+    try {
+      task.value = await runWorkflowAnalysisTask(task.value.id)
+    } catch (error) {
+      detailErrorMessage.value = formatUnknownError(error, '运行 workflow 分析失败')
+    } finally {
+      runningWorkflow.value = false
+    }
+  }
+
   return {
     task,
     detailLoading,
     runningMock,
+    runningWorkflow,
     detailErrorMessage,
     loadTask,
     runMock,
+    runWorkflow,
   }
 }

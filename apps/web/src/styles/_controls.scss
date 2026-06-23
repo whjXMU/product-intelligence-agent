@@ -1,0 +1,42 @@
+.primary-button,
+.secondary-button,
+.ghost-button {
+  min-height: 40px;
+  border-radius: var(--radius-control);
+  padding: 0 15px;
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.primary-button {
+  color: #ffffff;
+  background: var(--color-primary);
+}
+
+.secondary-button {
+  color: #ffffff;
+  background: var(--color-primary-dark);
+}
+
+.ghost-button {
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+}
+
+.compact {
+  min-height: 36px;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+@media (max-width: 900px) {
+  .secondary-button,
+  .primary-button,
+  .ghost-button {
+    width: 100%;
+  }
+}

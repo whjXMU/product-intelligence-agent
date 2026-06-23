@@ -25,3 +25,9 @@ export function runMockAnalysisTask(id: string) {
     method: 'POST',
   })
 }
+
+export function runWorkflowAnalysisTask(id: string) {
+  return requestJson<AnalysisTaskDto>(`/analysis-tasks/${id}/run-workflow`, {
+    method: 'POST',
+  })
+}
