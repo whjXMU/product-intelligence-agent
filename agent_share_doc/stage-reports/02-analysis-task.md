@@ -225,6 +225,52 @@ pnpm dev:web
 
 ## 当前执行状态
 
+阶段 02 已完成并通过总控验收。
+
+## 总控验收记录
+
+验收时间：2026-06-23
+
+总控检查结果：
+
+- 后端 `analysis-tasks` 模块边界清晰，controller/service/mock runner/entity/mapper 分层合理；
+- `packages/shared/src/analysis-task.ts` 已成为前后端共享 DTO 和 zod 校验来源；
+- `analysis_tasks` migration 可被 TypeORM migration 命令识别；
+- 前端任务工作台已拆分为 router、API、composables、components 和展示工具；
+- `packages/agent-mvp` 仍保持实验包地位，没有被正式业务直接继承；
+- 页面标题已从默认 `web` 调整为 `product-intelligence-agent`。
+
+总控验证命令：
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm build
+pnpm --filter @product-intelligence-agent/api test
+pnpm --filter @product-intelligence-agent/api test:e2e
+pnpm --filter @product-intelligence-agent/web build
+pnpm db:migrate
+```
+
+以上命令均已通过。
+
+集成验证：
+
+- `docker compose up -d postgres`：PostgreSQL 容器运行中；
+- `\dt analysis_tasks`：确认 `analysis_tasks` 表存在；
+- `GET /health`：返回数据库连接正常；
+- `POST /analysis-tasks`：创建验收任务成功，状态为 `created`；
+- `POST /analysis-tasks/:id/run-mock`：mock 执行成功，状态变为 `completed`，并写入 `result` 和 `trace`；
+- `GET /analysis-tasks`：可返回任务列表；
+- `pnpm dev:web`：Vite 启动成功，因 5173 被占用自动使用 5174；
+- `GET http://localhost:5174/analysis-tasks`：前端入口返回 200。
+
+验收结论：
+
+阶段 02 达成目标。项目已经从纯工程骨架进入了可持久化、可展示、可演进的业务任务闭环。
+
+## 后端子窗口完成记录
+
 后端子窗口已完成阶段 02 后端任务骨架。
 
 完成内容：

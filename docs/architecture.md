@@ -42,7 +42,9 @@ docs/
 
 ### packages/agent-core
 
-存放 Agent 应用的核心抽象。当前只定义最小 contract，不实现复杂逻辑。
+存放 Agent 应用的核心抽象。阶段 03 开始承担正式 `AgentWorkflow` contract、workflow run input/output、trace contract 等纯 TypeScript 边界。
+
+注意：`agent-core` 不依赖 Nest、TypeORM、Vue，也不直接读取数据库。API 层负责把 `analysis_tasks` 转换为 workflow input，再调用 `agent-core`。
 
 ### packages/evals
 
@@ -65,6 +67,22 @@ docs/
 - Evaluation：未来管理样例、评分、回归测试；
 - Observability：未来记录 trace、耗时、token、失败原因。
 
+## analysis_tasks 与 Agent Workflow 的关系
+
+`analysis_tasks` 是业务聚合根，保存用户任务、当前状态、最新结果和最新 trace。
+
+正式 Agent Workflow 不直接拥有业务生命周期，而是被 API 层调用：
+
+```text
+apps/api
+  读取 analysis_tasks
+  → 转换为 AnalysisTaskInputV1
+  → 调用 packages/agent-core workflow
+  → 写回 AnalysisTaskResultV1 和 AgentTraceV1
+```
+
+阶段 03 暂不新增 `analysis_task_runs` 表。只有当需要多次运行历史、审计、异步队列或 artifact store 时，再引入 run history 表。
+
 ## 当前推荐约束
 
 - 不在 Controller 中堆 Agent 逻辑；
@@ -72,4 +90,5 @@ docs/
 - 不复制 DTO，优先从 `packages/shared` 引用；
 - 数据库变更通过 migration 演进；
 - 不把 `packages/agent-mvp` 的 spike 实现直接升级为正式架构；
+- `input`、`result`、`trace` 使用版本化 schema 演进；
 - 每个阶段完成后更新共享记忆和阶段报告。

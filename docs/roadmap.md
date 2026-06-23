@@ -65,16 +65,26 @@
 - mock 分析结果。
 - 为后续 Agent 执行预留任务状态、输入、结果和 trace 字段。
 
-## 阶段 03：正式 Agent Workflow 雏形
+## 阶段 03：正式 Agent Workflow Contract
 
-目标：把竞品分析拆成可观察、可测试的步骤。
+目标：把 `analysis_tasks` 的 `input`、`result`、`trace`、`status` 升级为正式版本化 contract，并建立 workflow runner 边界。
 
 可能产出：
 
-- workflow contract；
-- mock workflow runner；
-- 每一步输入输出 schema；
-- trace 记录雏形。
+- `AnalysisTaskInputV1`；
+- `AnalysisTaskResultV1`；
+- `AgentTraceV1`；
+- `AgentWorkflow` contract；
+- deterministic runner；
+- `POST /analysis-tasks/:id/run-workflow`；
+- 前端新版报告和 trace 概览展示。
+
+当前不做：
+
+- 真实 LLM；
+- 队列；
+- 多 Agent；
+- 直接复用 `packages/agent-mvp`。
 
 ## 阶段 04：接入 LLM
 

@@ -11,12 +11,14 @@
 3. `docs/architecture.md`
 4. `docs/roadmap.md`
 5. `README.md`
-6. 当前阶段任务说明：`agent_share_doc/stage-reports/02-analysis-task.md`
+6. 当前阶段任务说明：`agent_share_doc/stage-reports/03-agent-workflow-architecture.md`
+7. 阶段 02 业务骨架总结：`agent_share_doc/stage-reports/02-analysis-task.md`
 
 如果任务涉及 Agent MVP 实验结果，再额外阅读：
 
-7. `agent_share_doc/stage-reports/02-agent-mvp.md`
-8. `docs/adr/0002-agent-mvp-spike-boundary.md`
+8. `agent_share_doc/stage-reports/02-agent-mvp.md`
+9. `docs/adr/0002-agent-mvp-spike-boundary.md`
+10. `docs/adr/0004-versioned-agent-workflow-schemas.md`
 
 ## 协作原则
 
@@ -34,9 +36,10 @@
 
 但正式产品主线仍然按以下顺序推进：
 
-1. 先建设业务任务骨架；
-2. 再建设正式 Agent Core 与 Workflow；
-3. 最后把模型调用、工具、评估和可观测性接入到稳定边界中。
+1. 已完成业务任务骨架；
+2. 当前先建设版本化 schema 和正式 Agent Workflow contract；
+3. 再把 workflow 接入 `analysis_tasks`；
+4. 最后把模型调用、工具、评估和可观测性接入到稳定边界中。
 
 任何子窗口如果被分配到正式 Agent 实现任务，必须先确认是否已经进入对应正式阶段，不得直接沿用 spike 的目录和边界。
 

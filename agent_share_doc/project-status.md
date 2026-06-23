@@ -6,25 +6,24 @@ product-intelligence-agent
 
 ## 当前阶段
 
-阶段 02：竞品分析任务业务骨架准备中。
+阶段 03：正式 Agent Workflow 架构设计中。
 
 ## 当前目标
 
-准备建立正式产品主线的第一个业务闭环：竞品分析任务。
+阶段 02 已建立正式产品主线的第一个业务闭环。当前进入阶段 03，先设计正式 Agent Workflow 如何接入 `analysis_tasks`。
 
-- 后端新增 `analysis_tasks` 表和任务 API；
-- 前端新增任务工作台；
-- 分析结果先使用 mock；
-- 为未来正式 Agent Workflow 预留 `result`、`trace`、`status` 等边界；
-- 继续保持 `packages/agent-mvp` 的实验包定位。
+- 明确 `input`、`result`、`trace`、`status` 的正式 schema；
+- 明确 `packages/shared`、`packages/agent-core`、`apps/api`、`apps/web` 的边界；
+- 阶段 03 先做 workflow contract 和 deterministic runner，不接真实 LLM；
+- 继续保持 `packages/agent-mvp` 为实验资产，不作为正式依赖。
 
 ## 当前立即实现
 
-- 创建 `analysis_tasks` 数据模型；
-- 创建任务 API；
-- 创建前端任务创建、列表、详情视图；
-- 创建 mock 分析报告；
-- 维护 shared DTO。
+- 固化版本化 `AnalysisTaskInputV1`；
+- 固化版本化 `AnalysisTaskResultV1`；
+- 固化版本化 `AgentTraceV1`；
+- 设计 `AgentWorkflow` contract；
+- 设计 `POST /analysis-tasks/:id/run-workflow` 接入方式。
 
 ## 当前只预留
 
@@ -52,11 +51,14 @@ product-intelligence-agent
 - 真实 LLM 调用；
 - 文档解析和网页抓取。
 - 把 `packages/agent-mvp` 直接升级为正式 Agent 实现。
-- 正式 Agent Workflow。
+- 队列化执行；
+- 多次运行历史表。
 
 ## 最近执行记录
 
 - 2026-06-22：完成阶段 02 前端任务工作台，并将前端实现拆分为 API、composables 和 feature components。
+- 2026-06-23：总控线程完成阶段 02 验收，API、数据库、前端入口、mock 任务闭环和测试均通过。
+- 2026-06-23：开始阶段 03 架构设计，新增正式 workflow schema 和接入方案说明。
 - 2026-06-22：执行阶段 01.5，开始校准主线文档，把 Agent MVP 验证归档为 spike。
 - 2026-06-22：完成阶段 01.5，补充 handoff、roadmap、architecture、ADR 和 spike 报告定性。
 - 2026-06-22：创建阶段 02 任务说明，明确先做 `analysis_tasks` 业务骨架，再接正式 Agent Workflow。
@@ -73,6 +75,6 @@ product-intelligence-agent
 
 ## 下一步
 
-1. 开启后端子窗口，按 `agent_share_doc/stage-reports/02-analysis-task.md` 实现任务 API 和数据库模型；
-2. 后端契约稳定后，开启前端子窗口实现任务工作台；
-3. 回到主窗口做验收、修正和文档收尾。
+1. 先开启子窗口 A，完成 shared schema 与 agent-core workflow contract；
+2. schema 稳定后，再开启 API 子窗口接入 deterministic runner；
+3. API 输出稳定后，再开启前端子窗口展示新版 result/trace。
