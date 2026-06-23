@@ -78,7 +78,8 @@
       ]
     },
     "moduleNameMapper": {
-      "^@product-intelligence-agent/shared$": "<rootDir>/test/shared.ts"
+      "^@product-intelligence-agent/shared$": "<rootDir>/test/shared.ts",
+      "^(\\.{1,2}/.*)\\.js$": "$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
