@@ -13,7 +13,7 @@ export class ZodValidationPipe<T> implements PipeTransform<unknown, T> {
     } catch (error) {
       if (error instanceof ZodError) {
         throw new BadRequestException({
-          code: ErrorCodes.VALIDATION_ERROR,
+          code: ErrorCodes.CORE_VALIDATION_FAILED,
           message: 'Invalid request body',
           details: error.issues,
         });

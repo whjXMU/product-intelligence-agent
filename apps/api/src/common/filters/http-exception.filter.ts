@@ -27,11 +27,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
     const errorBody = this.normalizeError(exception, status);
+    const requestId = request.requestId ?? 'unknown';
+    const traceId = request.traceId ?? requestId;
     const body: ApiErrorResponse = {
-      success: false,
-      error: errorBody,
+      code: errorBody.code,
+      message: errorBody.message,
+      data: null,
+      ...(errorBody.details === undefined
+        ? {}
+        : { error: { details: errorBody.details } }),
       meta: {
-        requestId: request.requestId ?? 'unknown',
+        requestId,
+        traceId,
         timestamp: new Date().toISOString(),
         path: request.originalUrl,
       },
@@ -46,7 +53,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   ): NormalizedErrorBody {
     if (!(exception instanceof HttpException)) {
       return {
-        code: ErrorCodes.INTERNAL_ERROR,
+        code: ErrorCodes.CORE_INTERNAL_ERROR,
         message: 'Internal server error',
       };
     }
@@ -81,14 +88,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   private codeFromStatus(status: number): string {
     if (status === 400) {
-      return ErrorCodes.VALIDATION_ERROR;
+      return ErrorCodes.CORE_VALIDATION_FAILED;
     }
 
     if (status === 404) {
-      return ErrorCodes.NOT_FOUND;
+      return ErrorCodes.CORE_NOT_FOUND;
     }
 
-    return ErrorCodes.INTERNAL_ERROR;
+    return ErrorCodes.CORE_INTERNAL_ERROR;
   }
 
   private isCustomErrorResponse(value: unknown): value is NormalizedErrorBody {

@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { ApiErrorResponse } from '@product-intelligence-agent/shared';
+import { ErrorCodes } from '../errors/error-codes';
 import { HttpExceptionFilter } from './http-exception.filter';
 
 const createHost = () => {
@@ -32,7 +33,7 @@ describe('HttpExceptionFilter', () => {
 
     filter.catch(
       new BadRequestException({
-        code: 'VALIDATION_ERROR',
+        code: ErrorCodes.CORE_VALIDATION_FAILED,
         message: 'Invalid request body',
         details: [{ path: ['title'] }],
       }),
@@ -41,10 +42,12 @@ describe('HttpExceptionFilter', () => {
 
     expect(response.status).toHaveBeenCalledWith(400);
     const body = response.json.mock.calls[0]?.[0];
-    expect(body?.success).toBe(false);
-    expect(body?.error.code).toBe('VALIDATION_ERROR');
-    expect(body?.error.message).toBe('Invalid request body');
+    expect(body?.code).toBe(ErrorCodes.CORE_VALIDATION_FAILED);
+    expect(body?.message).toBe('Invalid request body');
+    expect(body?.data).toBeNull();
+    expect(body?.error?.details).toEqual([{ path: ['title'] }]);
     expect(body?.meta.requestId).toBe('request-1');
+    expect(body?.meta.traceId).toBe('request-1');
     expect(body?.meta.path).toBe('/analysis-tasks');
   });
 
@@ -56,7 +59,8 @@ describe('HttpExceptionFilter', () => {
 
     expect(response.status).toHaveBeenCalledWith(404);
     const body = response.json.mock.calls[0]?.[0];
-    expect(body?.error.code).toBe('NOT_FOUND');
-    expect(body?.error.message).toBe('missing task');
+    expect(body?.code).toBe(ErrorCodes.CORE_NOT_FOUND);
+    expect(body?.message).toBe('missing task');
+    expect(body?.data).toBeNull();
   });
 });

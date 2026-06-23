@@ -12,6 +12,7 @@ import type {
   CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared';
 import { Repository } from 'typeorm';
+import { ErrorCodes } from '../../../common/errors/error-codes';
 import {
   AnalysisTaskAlreadyRunningError,
   assertCanRunAnalysisTask,
@@ -87,7 +88,7 @@ export class AnalysisTasksService {
       await this.markFailed(runningTask, { errorMessage });
 
       throw new InternalServerErrorException({
-        code: 'ANALYSIS_TASK_RUN_FAILED',
+        code: ErrorCodes.ANALYSIS_TASK_RUN_FAILED,
         message: 'Failed to run mock analysis task',
         details: {
           taskId: runningTask.id,
@@ -125,7 +126,7 @@ export class AnalysisTasksService {
         workflowId: this.workflowRunner.id,
         workflowVersion: this.workflowRunner.version,
         mode: 'deterministic',
-        errorCode: 'ANALYSIS_TASK_WORKFLOW_RUN_FAILED',
+        errorCode: ErrorCodes.ANALYSIS_TASK_WORKFLOW_RUN_FAILED,
         errorMessage,
       });
 
@@ -133,14 +134,14 @@ export class AnalysisTasksService {
 
       if (error instanceof InputMappingError) {
         throw new BadRequestException({
-          code: 'ANALYSIS_TASK_INPUT_INVALID',
+          code: ErrorCodes.ANALYSIS_TASK_INPUT_INVALID,
           message: error.message,
           details: error.issues,
         });
       }
 
       throw new InternalServerErrorException({
-        code: 'ANALYSIS_TASK_WORKFLOW_RUN_FAILED',
+        code: ErrorCodes.ANALYSIS_TASK_WORKFLOW_RUN_FAILED,
         message: 'Failed to run analysis task workflow',
         details: {
           taskId: runningTask.id,
@@ -154,7 +155,11 @@ export class AnalysisTasksService {
     const task = await this.analysisTasksRepository.findOne({ where: { id } });
 
     if (!task) {
-      throw new NotFoundException(`Analysis task ${id} not found`);
+      throw new NotFoundException({
+        code: ErrorCodes.ANALYSIS_TASK_NOT_FOUND,
+        message: `Analysis task ${id} not found`,
+        details: { taskId: id },
+      });
     }
 
     return task;
@@ -217,7 +222,7 @@ function assertCanRunAnalysisTaskForHttp(task: AnalysisTaskEntity): void {
   } catch (error) {
     if (error instanceof AnalysisTaskAlreadyRunningError) {
       throw new ConflictException({
-        code: 'ANALYSIS_TASK_ALREADY_RUNNING',
+        code: ErrorCodes.ANALYSIS_TASK_ALREADY_RUNNING,
         message: error.message,
         details: {
           taskId: error.taskId,

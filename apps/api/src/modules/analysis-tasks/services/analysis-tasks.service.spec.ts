@@ -11,6 +11,7 @@ import type {
   AnalysisTaskInputV1,
   AnalysisTaskResultV1,
 } from '@product-intelligence-agent/shared';
+import { ErrorCodes } from '../../../common/errors/error-codes';
 import { AnalysisTaskEntity } from '../entities/analysis-task.entity';
 import { WorkflowRunnerService } from '../workflow/runner.service';
 import { AnalysisTaskMockRunnerService } from './analysis-task-mock-runner.service';
@@ -314,7 +315,7 @@ describe('AnalysisTasksService', () => {
         mode: 'deterministic',
         status: 'failed',
         error: {
-          code: 'ANALYSIS_TASK_WORKFLOW_RUN_FAILED',
+          code: ErrorCodes.ANALYSIS_TASK_WORKFLOW_RUN_FAILED,
           message: 'workflow failed',
         },
       },

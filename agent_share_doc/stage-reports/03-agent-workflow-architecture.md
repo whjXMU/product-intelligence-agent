@@ -854,3 +854,67 @@ pnpm --filter @product-intelligence-agent/web typecheck
 - 阶段 03 可以由总控收口；
 - 下一阶段进入正式 Agent runner/model provider 设计时，前端可继续沿用 V1 result/trace 的 `schemaVersion` 判别边界；
 - 如果后续 trace 增加真实 model/tool/guardrail 数据，当前详情页已有展示入口，无需改变 API 接入方式。
+
+## 总控复查记录：子窗口 C
+
+复查日期：2026-06-24
+
+总控结论：
+
+- 子窗口 C 已完成前端 V1 result/trace 展示适配；
+- API 调用封装在 `analysisTasks.api.ts`；
+- 执行状态放在 `useAnalysisTaskDetail`；
+- result/trace 类型判别放在 `analysisTaskDisplay.ts`；
+- 展示组件能够区分阶段 02 mock result/trace 和阶段 03 `AnalysisTaskResultV1` / `AgentTraceV1`；
+- `modelCalls`、`toolCalls`、`guardrails` 为空时有空状态；
+- 未修改后端 API、shared schema 或 `packages/agent-mvp`；
+- 阶段 03 已形成从 API 到前端展示的闭环，可以收口。
+
+总控验证命令：
+
+```bash
+pnpm --filter @product-intelligence-agent/web typecheck
+pnpm --filter @product-intelligence-agent/web build
+pnpm typecheck
+pnpm lint
+pnpm build
+pnpm --filter @product-intelligence-agent/api test
+```
+
+验证结果：全部通过。
+
+本地入口验证：
+
+```bash
+pnpm dev:web
+curl -I http://localhost:5174/analysis-tasks
+```
+
+结果：前端路由入口返回 `200 OK`，dev server 已停止。
+
+## 阶段 03 收口结论
+
+阶段 03 已完成。
+
+当前项目已经具备：
+
+- 版本化 `AnalysisTaskInputV1`；
+- 版本化 `AnalysisTaskResultV1`；
+- 版本化 `AgentTraceV1`；
+- `AgentWorkflow` contract；
+- API deterministic runner；
+- `POST /analysis-tasks/:id/run-workflow`；
+- 前端展示新版 result/trace；
+- 阶段 02 mock result/trace 兼容；
+- `packages/agent-mvp` 仍保持实验资产地位。
+
+下一阶段建议进入阶段 04：正式 Agent runner / model provider 设计。
+
+阶段 04 仍不建议一开始就做复杂多 Agent。推荐先设计：
+
+- `packages/agent-core` 内正式 workflow runner 组织；
+- model provider contract；
+- prompt version contract；
+- trace 写入边界；
+- evals 最小样例；
+- DeepSeek/OpenAI provider 何时接入。

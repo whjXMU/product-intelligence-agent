@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { ApiResponseInterceptor } from './common/interceptors/api-response.interceptor';
 import { getAppConfig } from './config/app.config';
 
 async function bootstrap() {
@@ -10,6 +11,7 @@ async function bootstrap() {
     origin: appConfig.webOrigin,
   });
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new ApiResponseInterceptor());
 
   await app.listen(appConfig.port);
 }
