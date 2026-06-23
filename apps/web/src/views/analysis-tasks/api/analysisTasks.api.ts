@@ -2,6 +2,7 @@ import type {
   AnalysisTaskDto,
   AnalysisTaskListItemDto,
   AnalysisTaskRunDto,
+  AnalysisTaskRunListItemDto,
   CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared'
 import { requestJson } from '../../../shared/api/http'
@@ -28,7 +29,7 @@ export function runMockAnalysisTask(id: string) {
 }
 
 export function runAnalysisAgent(id: string) {
-  return createAnalysisTaskRun(id).then(() => getAnalysisTask(id))
+  return createAnalysisTaskRun(id)
 }
 
 export function createAnalysisTaskRun(id: string) {
@@ -39,4 +40,8 @@ export function createAnalysisTaskRun(id: string) {
 
 export function getAnalysisTaskRun(taskId: string, runId: string) {
   return requestJson<AnalysisTaskRunDto>(`/analysis-tasks/${taskId}/runs/${runId}`)
+}
+
+export function listAnalysisTaskRuns(taskId: string) {
+  return requestJson<AnalysisTaskRunListItemDto[]>(`/analysis-tasks/${taskId}/runs`)
 }

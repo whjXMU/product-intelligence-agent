@@ -2,6 +2,7 @@ import type {
   AnalysisTaskDto,
   AnalysisTaskListItemDto,
   AnalysisTaskRunDto,
+  AnalysisTaskRunListItemDto,
   CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared';
 import { AnalysisTaskRunsService } from '../services/analysis-task-runs.service';
@@ -14,7 +15,7 @@ describe('AnalysisTasksController', () => {
     Pick<AnalysisTasksService, 'create' | 'findAll' | 'findOne' | 'runMock'>
   >;
   let runsService: jest.Mocked<
-    Pick<AnalysisTaskRunsService, 'createAgentRun' | 'findRun'>
+    Pick<AnalysisTaskRunsService, 'createAgentRun' | 'findRun' | 'listRuns'>
   >;
 
   beforeEach(() => {
@@ -27,6 +28,7 @@ describe('AnalysisTasksController', () => {
     runsService = {
       createAgentRun: jest.fn(),
       findRun: jest.fn(),
+      listRuns: jest.fn(),
     };
     controller = new AnalysisTasksController(
       service as unknown as AnalysisTasksService,
@@ -90,13 +92,17 @@ describe('AnalysisTasksController', () => {
   it('delegates agent run creation and lookup to the run service', async () => {
     const dto = createTaskDto();
     const run = createRunDto({ taskId: dto.id });
+    const runListItem = createRunListItemDto({ taskId: dto.id });
     runsService.createAgentRun.mockResolvedValueOnce(run);
     runsService.findRun.mockResolvedValueOnce(run);
+    runsService.listRuns.mockResolvedValueOnce([runListItem]);
 
     await expect(controller.createRun(dto.id)).resolves.toBe(run);
+    await expect(controller.listRuns(dto.id)).resolves.toEqual([runListItem]);
     await expect(controller.findRun(dto.id, run.id)).resolves.toBe(run);
 
     expect(runsService.createAgentRun).toHaveBeenCalledWith(dto.id);
+    expect(runsService.listRuns).toHaveBeenCalledWith(dto.id);
     expect(runsService.findRun).toHaveBeenCalledWith(dto.id, run.id);
   });
 });
@@ -144,5 +150,26 @@ function createRunDto(
     createdAt: '2026-06-22T00:01:00.000Z',
     updatedAt: '2026-06-22T00:02:00.000Z',
     ...overrides,
+  };
+}
+
+function createRunListItemDto(
+  overrides: Partial<AnalysisTaskRunListItemDto> = {},
+): AnalysisTaskRunListItemDto {
+  const run = createRunDto(overrides);
+
+  return {
+    id: run.id,
+    taskId: run.taskId,
+    workflowId: run.workflowId,
+    workflowVersion: run.workflowVersion,
+    mode: run.mode,
+    status: run.status,
+    errorCode: run.errorCode,
+    errorMessage: run.errorMessage,
+    startedAt: run.startedAt,
+    endedAt: run.endedAt,
+    createdAt: run.createdAt,
+    updatedAt: run.updatedAt,
   };
 }

@@ -6,7 +6,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import type { AnalysisTaskRunDto } from '@product-intelligence-agent/shared';
+import type {
+  AnalysisTaskRunDto,
+  AnalysisTaskRunListItemDto,
+} from '@product-intelligence-agent/shared';
 import { DataSource, Repository } from 'typeorm';
 import { ErrorCodes } from '../../../common/errors/error-codes';
 import {
@@ -15,7 +18,10 @@ import {
 } from '../domain/task-status';
 import { AnalysisTaskRunEntity } from '../entities/analysis-task-run.entity';
 import { AnalysisTaskEntity } from '../entities/analysis-task.entity';
-import { toAnalysisTaskRunDto } from '../mappers/analysis-task-run.mapper';
+import {
+  toAnalysisTaskRunDto,
+  toAnalysisTaskRunListItemDto,
+} from '../mappers/analysis-task-run.mapper';
 import {
   InputMappingError,
   toWorkflowInputV1,
@@ -108,6 +114,18 @@ export class AnalysisTaskRunsService {
     }
 
     return toAnalysisTaskRunDto(run);
+  }
+
+  async listRuns(taskId: string): Promise<AnalysisTaskRunListItemDto[]> {
+    await this.findTaskById(taskId);
+
+    const runs = await this.analysisTaskRunsRepository.find({
+      where: { taskId },
+      order: { createdAt: 'DESC' },
+      take: 5,
+    });
+
+    return runs.map((run) => toAnalysisTaskRunListItemDto(run));
   }
 
   private async claimAgentRun(

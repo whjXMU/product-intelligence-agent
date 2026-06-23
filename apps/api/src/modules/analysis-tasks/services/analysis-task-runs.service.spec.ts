@@ -30,6 +30,7 @@ interface MockAnalysisTaskRunRepository {
     [Partial<AnalysisTaskRunEntity>]
   >;
   findOne: jest.Mock<Promise<AnalysisTaskRunEntity | null>, [unknown?]>;
+  find: jest.Mock<Promise<AnalysisTaskRunEntity[]>, [unknown?]>;
 }
 
 interface MockEntityManager {
@@ -121,6 +122,12 @@ describe('AnalysisTaskRunsService', () => {
         ),
       ),
       findOne: jest.fn(() => Promise.resolve(baseRun())),
+      find: jest.fn(() =>
+        Promise.resolve([
+          baseRun({ id: 'run-latest', status: 'completed' }),
+          baseRun({ id: 'run-previous', status: 'failed' }),
+        ]),
+      ),
     };
     transactionManager = {
       getRepository: jest.fn((entity) => {
@@ -338,6 +345,31 @@ describe('AnalysisTaskRunsService', () => {
       taskId: 'task-1',
       status: 'running',
     });
+  });
+
+  it('lists recent runs without result and trace payloads', async () => {
+    const runs = await service.listRuns('task-1');
+
+    expect(taskRepository.findOne).toHaveBeenCalledWith({
+      where: { id: 'task-1' },
+    });
+    expect(runRepository.find).toHaveBeenCalledWith({
+      where: { taskId: 'task-1' },
+      order: { createdAt: 'DESC' },
+      take: 5,
+    });
+    expect(runs).toEqual([
+      expect.objectContaining({
+        id: 'run-latest',
+        status: 'completed',
+      }),
+      expect.objectContaining({
+        id: 'run-previous',
+        status: 'failed',
+      }),
+    ]);
+    expect(runs[0]).not.toHaveProperty('result');
+    expect(runs[0]).not.toHaveProperty('trace');
   });
 
   it('throws when a task cannot be found', async () => {

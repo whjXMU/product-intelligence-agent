@@ -19,3 +19,19 @@ export interface AnalysisTaskRunDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type AnalysisTaskRunListItemDto = Pick<
+  AnalysisTaskRunDto,
+  | 'id'
+  | 'taskId'
+  | 'workflowId'
+  | 'workflowVersion'
+  | 'mode'
+  | 'status'
+  | 'errorCode'
+  | 'errorMessage'
+  | 'startedAt'
+  | 'endedAt'
+  | 'createdAt'
+  | 'updatedAt'
+>;

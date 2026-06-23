@@ -7,6 +7,7 @@
 
   <AnalysisTaskDetailPanel
     :task="task"
+    :latest-run="latestRun"
     :detail-loading="detailLoading"
     :running-mock="runningMock"
     :running-agent="runningAgent"
@@ -24,6 +25,7 @@ import { useAnalysisTaskDetail } from './composables/useAnalysisTaskDetail'
 const route = useRoute()
 const {
   task,
+  latestRun,
   detailLoading,
   runningMock,
   runningAgent,

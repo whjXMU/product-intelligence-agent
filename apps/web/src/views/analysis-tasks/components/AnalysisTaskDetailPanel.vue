@@ -71,6 +71,35 @@
         </dl>
       </section>
 
+      <section v-if="latestRun" class="report-block run-block">
+        <div class="run-heading">
+          <h3>最近一次 Agent Run</h3>
+          <strong>{{ getRunStatusText(latestRun.status) }}</strong>
+        </div>
+        <dl class="input-list">
+          <div>
+            <dt>Run ID</dt>
+            <dd>{{ latestRun.id }}</dd>
+          </div>
+          <div>
+            <dt>模式</dt>
+            <dd>{{ latestRun.mode }}</dd>
+          </div>
+          <div>
+            <dt>开始时间</dt>
+            <dd>{{ formatTaskDate(latestRun.startedAt) }}</dd>
+          </div>
+          <div>
+            <dt>结束时间</dt>
+            <dd>{{ latestRun.endedAt ? formatTaskDate(latestRun.endedAt) : '-' }}</dd>
+          </div>
+          <div v-if="latestRun.errorCode">
+            <dt>错误码</dt>
+            <dd>{{ latestRun.errorCode }}</dd>
+          </div>
+        </dl>
+      </section>
+
       <AnalysisTaskResultPanel :result="task.result" />
       <AnalysisTaskTracePanel :trace="task.trace" />
     </div>
@@ -81,7 +110,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { AnalysisTaskDto } from '@product-intelligence-agent/shared'
+import type {
+  AnalysisTaskDto,
+  AnalysisTaskRunListItemDto,
+} from '@product-intelligence-agent/shared'
 import {
   formatTaskDate,
   getTaskStatusText,
@@ -91,6 +123,7 @@ import AnalysisTaskTracePanel from './AnalysisTaskTracePanel.vue'
 
 const props = defineProps<{
   task: AnalysisTaskDto | null
+  latestRun: AnalysisTaskRunListItemDto | null
   detailLoading: boolean
   runningMock: boolean
   runningAgent: boolean
@@ -102,6 +135,16 @@ const emit = defineEmits<{
 }>()
 
 const isRunning = computed(() => props.runningMock || props.runningAgent)
+
+function getRunStatusText(status: AnalysisTaskRunListItemDto['status']) {
+  const statusMap: Record<AnalysisTaskRunListItemDto['status'], string> = {
+    running: '运行中',
+    completed: '已完成',
+    failed: '失败',
+  }
+
+  return statusMap[status]
+}
 </script>
 
 <style scoped lang="scss">
@@ -171,6 +214,26 @@ const isRunning = computed(() => props.runningMock || props.runningAgent)
   margin: 0;
   overflow-wrap: anywhere;
   color: var(--color-text-secondary);
+}
+
+.run-block {
+  background: var(--color-surface-soft);
+}
+
+.run-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  h3 {
+    margin-bottom: 0;
+  }
+
+  strong {
+    color: var(--color-primary);
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 900px) {

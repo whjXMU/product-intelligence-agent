@@ -1,7 +1,11 @@
 import { ref } from 'vue'
-import type { AnalysisTaskDto } from '@product-intelligence-agent/shared'
+import type {
+  AnalysisTaskDto,
+  AnalysisTaskRunListItemDto,
+} from '@product-intelligence-agent/shared'
 import {
   getAnalysisTask,
+  listAnalysisTaskRuns,
   runAnalysisAgent,
   runMockAnalysisTask,
 } from '../api/analysisTasks.api'
@@ -9,6 +13,7 @@ import { formatUnknownError } from '../../../shared/utils/error'
 
 export function useAnalysisTaskDetail() {
   const task = ref<AnalysisTaskDto | null>(null)
+  const latestRun = ref<AnalysisTaskRunListItemDto | null>(null)
   const detailLoading = ref(false)
   const runningMock = ref(false)
   const runningAgent = ref(false)
@@ -20,9 +25,16 @@ export function useAnalysisTaskDetail() {
 
     try {
       task.value = await getAnalysisTask(id)
+      try {
+        const runs = await listAnalysisTaskRuns(id)
+        latestRun.value = runs[0] ?? null
+      } catch {
+        latestRun.value = null
+      }
     } catch (error) {
       detailErrorMessage.value = formatUnknownError(error, '加载任务详情失败')
       task.value = null
+      latestRun.value = null
     } finally {
       detailLoading.value = false
     }
@@ -46,11 +58,14 @@ export function useAnalysisTaskDetail() {
   async function runAgent() {
     if (!task.value) return
 
+    const taskId = task.value.id
     runningAgent.value = true
     detailErrorMessage.value = ''
 
     try {
-      task.value = await runAnalysisAgent(task.value.id)
+      const run = await runAnalysisAgent(taskId)
+      latestRun.value = run
+      task.value = await getAnalysisTask(taskId)
     } catch (error) {
       detailErrorMessage.value = formatUnknownError(error, '运行 Agent 分析失败')
     } finally {
@@ -60,6 +75,7 @@ export function useAnalysisTaskDetail() {
 
   return {
     task,
+    latestRun,
     detailLoading,
     runningMock,
     runningAgent,

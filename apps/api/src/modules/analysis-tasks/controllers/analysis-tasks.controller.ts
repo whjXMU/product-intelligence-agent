@@ -11,6 +11,7 @@ import {
   type AnalysisTaskDto,
   type AnalysisTaskListItemDto,
   type AnalysisTaskRunDto,
+  type AnalysisTaskRunListItemDto,
   type CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
@@ -56,6 +57,13 @@ export class AnalysisTasksController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<AnalysisTaskRunDto> {
     return this.analysisTaskRunsService.createAgentRun(id);
+  }
+
+  @Get(':id/runs')
+  async listRuns(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<AnalysisTaskRunListItemDto[]> {
+    return this.analysisTaskRunsService.listRuns(id);
   }
 
   @Get(':id/runs/:runId')
