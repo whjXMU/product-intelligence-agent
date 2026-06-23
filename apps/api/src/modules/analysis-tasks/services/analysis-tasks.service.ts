@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -22,13 +21,7 @@ import {
   toAnalysisTaskDto,
   toAnalysisTaskListItemDto,
 } from '../mappers/analysis-task.mapper';
-import {
-  InputMappingError,
-  toWorkflowInputV1,
-} from '../mappers/workflow-input.mapper';
-import { createFailedTrace } from '../workflow/trace.factory';
 import { AnalysisTaskMockRunnerService } from './analysis-task-mock-runner.service';
-import { WorkflowRunnerService } from '../workflow/runner.service';
 
 @Injectable()
 export class AnalysisTasksService {
@@ -36,7 +29,6 @@ export class AnalysisTasksService {
     @InjectRepository(AnalysisTaskEntity)
     private readonly analysisTasksRepository: Repository<AnalysisTaskEntity>,
     private readonly mockRunner: AnalysisTaskMockRunnerService,
-    private readonly workflowRunner: WorkflowRunnerService,
   ) {}
 
   async create(request: CreateAnalysisTaskRequest): Promise<AnalysisTaskDto> {
@@ -90,59 +82,6 @@ export class AnalysisTasksService {
       throw new InternalServerErrorException({
         code: ErrorCodes.ANALYSIS_TASK_RUN_FAILED,
         message: 'Failed to run mock analysis task',
-        details: {
-          taskId: runningTask.id,
-          errorMessage,
-        },
-      });
-    }
-  }
-
-  async runWorkflow(id: string): Promise<AnalysisTaskDto> {
-    const task = await this.findEntityById(id);
-
-    assertCanRunAnalysisTaskForHttp(task);
-
-    const startedAt = new Date().toISOString();
-    const runningTask = await this.markRunning(task, { clearOutput: true });
-
-    try {
-      const input = toWorkflowInputV1(runningTask);
-      const { result, trace } = await this.workflowRunner.run({
-        taskId: runningTask.id,
-        input,
-        startedAt,
-        mode: 'deterministic',
-      });
-
-      return toAnalysisTaskDto(
-        await this.markCompleted(runningTask, { result, trace }),
-      );
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      const trace = createFailedTrace({
-        taskId: runningTask.id,
-        startedAt,
-        workflowId: this.workflowRunner.id,
-        workflowVersion: this.workflowRunner.version,
-        mode: 'deterministic',
-        errorCode: ErrorCodes.ANALYSIS_TASK_WORKFLOW_RUN_FAILED,
-        errorMessage,
-      });
-
-      await this.markFailed(runningTask, { trace, errorMessage });
-
-      if (error instanceof InputMappingError) {
-        throw new BadRequestException({
-          code: ErrorCodes.ANALYSIS_TASK_INPUT_INVALID,
-          message: error.message,
-          details: error.issues,
-        });
-      }
-
-      throw new InternalServerErrorException({
-        code: ErrorCodes.ANALYSIS_TASK_WORKFLOW_RUN_FAILED,
-        message: 'Failed to run analysis task workflow',
         details: {
           taskId: runningTask.id,
           errorMessage,
@@ -208,12 +147,6 @@ export class AnalysisTasksService {
       errorMessage: failure.errorMessage,
     });
   }
-}
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : 'Unknown workflow runner error';
 }
 
 function assertCanRunAnalysisTaskForHttp(task: AnalysisTaskEntity): void {

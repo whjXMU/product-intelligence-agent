@@ -10,14 +10,19 @@ import {
   createAnalysisTaskRequestSchema,
   type AnalysisTaskDto,
   type AnalysisTaskListItemDto,
+  type AnalysisTaskRunDto,
   type CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
+import { AnalysisTaskRunsService } from '../services/analysis-task-runs.service';
 import { AnalysisTasksService } from '../services/analysis-tasks.service';
 
 @Controller('analysis-tasks')
 export class AnalysisTasksController {
-  constructor(private readonly analysisTasksService: AnalysisTasksService) {}
+  constructor(
+    private readonly analysisTasksService: AnalysisTasksService,
+    private readonly analysisTaskRunsService: AnalysisTaskRunsService,
+  ) {}
 
   @Post()
   async create(
@@ -46,10 +51,18 @@ export class AnalysisTasksController {
     return this.analysisTasksService.runMock(id);
   }
 
-  @Post(':id/run-workflow')
-  async runWorkflow(
+  @Post(':id/runs')
+  async createRun(
     @Param('id', new ParseUUIDPipe()) id: string,
-  ): Promise<AnalysisTaskDto> {
-    return this.analysisTasksService.runWorkflow(id);
+  ): Promise<AnalysisTaskRunDto> {
+    return this.analysisTaskRunsService.createAgentRun(id);
+  }
+
+  @Get(':id/runs/:runId')
+  async findRun(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('runId', new ParseUUIDPipe()) runId: string,
+  ): Promise<AnalysisTaskRunDto> {
+    return this.analysisTaskRunsService.findRun(id, runId);
   }
 }

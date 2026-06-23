@@ -1,18 +1,20 @@
 import type {
   AnalysisTaskDto,
   AnalysisTaskListItemDto,
+  AnalysisTaskRunDto,
   CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared';
+import { AnalysisTaskRunsService } from '../services/analysis-task-runs.service';
 import { AnalysisTasksService } from '../services/analysis-tasks.service';
 import { AnalysisTasksController } from './analysis-tasks.controller';
 
 describe('AnalysisTasksController', () => {
   let controller: AnalysisTasksController;
   let service: jest.Mocked<
-    Pick<
-      AnalysisTasksService,
-      'create' | 'findAll' | 'findOne' | 'runMock' | 'runWorkflow'
-    >
+    Pick<AnalysisTasksService, 'create' | 'findAll' | 'findOne' | 'runMock'>
+  >;
+  let runsService: jest.Mocked<
+    Pick<AnalysisTaskRunsService, 'createAgentRun' | 'findRun'>
   >;
 
   beforeEach(() => {
@@ -21,10 +23,14 @@ describe('AnalysisTasksController', () => {
       findAll: jest.fn(),
       findOne: jest.fn(),
       runMock: jest.fn(),
-      runWorkflow: jest.fn(),
+    };
+    runsService = {
+      createAgentRun: jest.fn(),
+      findRun: jest.fn(),
     };
     controller = new AnalysisTasksController(
       service as unknown as AnalysisTasksService,
+      runsService as unknown as AnalysisTaskRunsService,
     );
   });
 
@@ -81,21 +87,17 @@ describe('AnalysisTasksController', () => {
     expect(service.runMock).toHaveBeenCalledWith(dto.id);
   });
 
-  it('delegates run-workflow to the service', async () => {
-    const dto = createTaskDto({
-      status: 'completed',
-      result: {
-        schemaVersion: 'analysis_task_result.v1',
-      },
-      trace: {
-        schemaVersion: 'agent_trace.v1',
-      },
-    });
-    service.runWorkflow.mockResolvedValueOnce(dto);
+  it('delegates agent run creation and lookup to the run service', async () => {
+    const dto = createTaskDto();
+    const run = createRunDto({ taskId: dto.id });
+    runsService.createAgentRun.mockResolvedValueOnce(run);
+    runsService.findRun.mockResolvedValueOnce(run);
 
-    await expect(controller.runWorkflow(dto.id)).resolves.toBe(dto);
+    await expect(controller.createRun(dto.id)).resolves.toBe(run);
+    await expect(controller.findRun(dto.id, run.id)).resolves.toBe(run);
 
-    expect(service.runWorkflow).toHaveBeenCalledWith(dto.id);
+    expect(runsService.createAgentRun).toHaveBeenCalledWith(dto.id);
+    expect(runsService.findRun).toHaveBeenCalledWith(dto.id, run.id);
   });
 });
 
@@ -119,6 +121,28 @@ function createTaskDto(
     errorMessage: null,
     createdAt: '2026-06-22T00:00:00.000Z',
     updatedAt: '2026-06-22T00:00:00.000Z',
+    ...overrides,
+  };
+}
+
+function createRunDto(
+  overrides: Partial<AnalysisTaskRunDto> = {},
+): AnalysisTaskRunDto {
+  return {
+    id: '1b5d77b7-7ff2-4752-ae79-4dc697f646a2',
+    taskId: '7b6f5b61-060f-4b0a-8bed-9c0e3b1ce2dd',
+    workflowId: 'competitive_analysis.v1',
+    workflowVersion: '2026-06-23.deterministic.v1',
+    mode: 'deterministic',
+    status: 'completed',
+    result: null,
+    trace: null,
+    errorCode: null,
+    errorMessage: null,
+    startedAt: '2026-06-22T00:01:00.000Z',
+    endedAt: '2026-06-22T00:02:00.000Z',
+    createdAt: '2026-06-22T00:01:00.000Z',
+    updatedAt: '2026-06-22T00:02:00.000Z',
     ...overrides,
   };
 }
