@@ -119,7 +119,7 @@
   </section>
 
   <section v-else class="empty-state report-placeholder">
-    当前任务还没有报告，点击“运行 workflow 分析”生成阶段 03 结果，或运行 mock 分析查看阶段 02 兼容结果。
+    当前任务还没有报告，点击“运行 Agent 分析”生成阶段 03 结果，或运行 mock 分析查看阶段 02 兼容结果。
   </section>
 </template>
 

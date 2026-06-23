@@ -2,8 +2,8 @@ import { ref } from 'vue'
 import type { AnalysisTaskDto } from '@product-intelligence-agent/shared'
 import {
   getAnalysisTask,
+  runAnalysisAgent,
   runMockAnalysisTask,
-  runWorkflowAnalysisTask,
 } from '../api/analysisTasks.api'
 import { formatUnknownError } from '../../../shared/utils/error'
 
@@ -11,7 +11,7 @@ export function useAnalysisTaskDetail() {
   const task = ref<AnalysisTaskDto | null>(null)
   const detailLoading = ref(false)
   const runningMock = ref(false)
-  const runningWorkflow = ref(false)
+  const runningAgent = ref(false)
   const detailErrorMessage = ref('')
 
   async function loadTask(id: string) {
@@ -43,18 +43,18 @@ export function useAnalysisTaskDetail() {
     }
   }
 
-  async function runWorkflow() {
+  async function runAgent() {
     if (!task.value) return
 
-    runningWorkflow.value = true
+    runningAgent.value = true
     detailErrorMessage.value = ''
 
     try {
-      task.value = await runWorkflowAnalysisTask(task.value.id)
+      task.value = await runAnalysisAgent(task.value.id)
     } catch (error) {
-      detailErrorMessage.value = formatUnknownError(error, '运行 workflow 分析失败')
+      detailErrorMessage.value = formatUnknownError(error, '运行 Agent 分析失败')
     } finally {
-      runningWorkflow.value = false
+      runningAgent.value = false
     }
   }
 
@@ -62,10 +62,10 @@ export function useAnalysisTaskDetail() {
     task,
     detailLoading,
     runningMock,
-    runningWorkflow,
+    runningAgent,
     detailErrorMessage,
     loadTask,
     runMock,
-    runWorkflow,
+    runAgent,
   }
 }

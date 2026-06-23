@@ -9,9 +9,9 @@
     :task="task"
     :detail-loading="detailLoading"
     :running-mock="runningMock"
-    :running-workflow="runningWorkflow"
+    :running-agent="runningAgent"
     @run-mock="runMock"
-    @run-workflow="runWorkflow"
+    @run-agent="runAgent"
   />
 </template>
 
@@ -26,11 +26,11 @@ const {
   task,
   detailLoading,
   runningMock,
-  runningWorkflow,
+  runningAgent,
   detailErrorMessage,
   loadTask,
   runMock,
-  runWorkflow,
+  runAgent,
 } = useAnalysisTaskDetail()
 
 const taskId = computed(() => {

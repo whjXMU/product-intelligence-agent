@@ -11,9 +11,9 @@
           class="primary-button compact"
           type="button"
           :disabled="!task || isRunning"
-          @click="emit('runWorkflow')"
+          @click="emit('runAgent')"
         >
-          {{ runningWorkflow ? '运行中' : '运行 workflow 分析' }}
+          {{ runningAgent ? '运行中' : '运行 Agent 分析' }}
         </button>
         <button
           class="ghost-button compact"
@@ -93,15 +93,15 @@ const props = defineProps<{
   task: AnalysisTaskDto | null
   detailLoading: boolean
   runningMock: boolean
-  runningWorkflow: boolean
+  runningAgent: boolean
 }>()
 
 const emit = defineEmits<{
   runMock: []
-  runWorkflow: []
+  runAgent: []
 }>()
 
-const isRunning = computed(() => props.runningMock || props.runningWorkflow)
+const isRunning = computed(() => props.runningMock || props.runningAgent)
 </script>
 
 <style scoped lang="scss">
