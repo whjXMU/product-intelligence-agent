@@ -1,7 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router'
 import type { AppRouteRecord } from './types'
 
-const routeModules = import.meta.glob<AppRouteRecord[]>('../../views/**/routes.ts', {
+const routeModules = import.meta.glob<AppRouteRecord[]>('../views/**/routes.ts', {
   eager: true,
   import: 'default',
 })

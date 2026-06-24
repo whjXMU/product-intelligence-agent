@@ -1,5 +1,5 @@
 <template>
-  <nav class="workspace-nav" aria-label="工作台导航">
+  <nav class="session-sidebar" aria-label="Session 导航">
     <section class="nav-section">
       <div class="section-heading inline-heading">
         <div>
@@ -48,84 +48,46 @@
           <el-tag :type="getSessionStatusTagType(session.status)" effect="light">
             {{ getSessionStatusText(session.status) }}
           </el-tag>
-          <span>{{ formatTaskDate(session.updatedAt) }}</span>
+          <span>{{ formatSessionDate(session.updatedAt) }}</span>
         </span>
       </button>
     </section>
-
-    <!-- <section class="nav-section">
-      <div class="section-heading inline-heading">
-        <div>
-          <p class="eyebrow">历史任务</p>
-          <h2>{{ tasks.length }} 个任务</h2>
-        </div>
-        <el-tag v-if="tasksLoading" type="info">加载中</el-tag>
-      </div>
-
-      <el-empty v-if="tasks.length === 0 && !tasksLoading" description="还没有任务" />
-
-      <button
-        v-for="task in tasks"
-        :key="task.id"
-        class="nav-item"
-        type="button"
-        @click="emit('select-task', task.id)"
-      >
-        <span class="item-title">{{ task.title }}</span>
-        <span class="item-meta">{{ task.productName }} vs {{ task.competitorName }}</span>
-        <span class="item-footer">
-          <el-tag :type="getTaskStatusTagType(task.status)" effect="light">
-            {{ getTaskStatusText(task.status) }}
-          </el-tag>
-          <span>{{ formatTaskDate(task.createdAt) }}</span>
-        </span>
-      </button>
-    </section> -->
   </nav>
 </template>
 
 <script setup lang="ts">
 import { ElAlert, ElButton, ElEmpty, ElTag } from 'element-plus'
 import { Delete, Plus } from '@element-plus/icons-vue'
-import type {
-  AnalysisSessionListItemDto,
-  AnalysisTaskListItemDto,
-} from '@product-intelligence-agent/shared'
+import type { AnalysisSessionListItemDto } from '@product-intelligence-agent/shared'
 import {
-  formatTaskDate,
+  formatSessionDate,
   getSessionStatusTagType,
   getSessionStatusText,
-  // getTaskStatusTagType,
-  // getTaskStatusText,
-} from '../utils/analysisTaskDisplay'
+} from '../utils/sessionDisplay'
 
 defineProps<{
   sessions: AnalysisSessionListItemDto[]
   selectedSessionId: string | null
   sessionsLoading: boolean
   sessionError: string
-  tasks: AnalysisTaskListItemDto[]
-  tasksLoading: boolean
 }>()
 
 const emit = defineEmits<{
   'new-session': []
   'select-session': [id: string]
   'delete-session': [id: string]
-  'select-task': [id: string]
 }>()
 </script>
 
 <style scoped lang="scss">
-.workspace-nav {
-  display: grid;
-  max-height: 720px;
+.session-sidebar {
   overflow: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   padding: 16px;
   background: var(--color-surface);
   box-shadow: var(--shadow-panel);
+  height: 100%;
 }
 
 .nav-section + .nav-section {
@@ -193,7 +155,7 @@ const emit = defineEmits<{
 }
 
 @media (max-width: 900px) {
-  .workspace-nav {
+  .session-sidebar {
     max-height: none;
   }
 }

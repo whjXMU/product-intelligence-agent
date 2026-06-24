@@ -10,12 +10,12 @@
     </el-button>
   </section>
 
-  <section class="status-strip" aria-label="任务状态概览">
+  <!-- <section class="status-strip" aria-label="任务状态概览">
     <div v-for="item in taskStats" :key="item.label" class="status-metric">
       <span>{{ item.label }}</span>
       <strong>{{ item.value }}</strong>
     </div>
-  </section>
+  </section> -->
 
   <el-alert
     v-if="taskErrorMessage"
@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElAlert, ElButton, ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
@@ -129,19 +129,6 @@ const {
   clearSelection,
   removeSession,
 } = useSessionList()
-
-const taskStats = computed(() => {
-  const running = tasks.value.filter((task) => task.status === 'running').length
-  const completed = tasks.value.filter((task) => task.status === 'completed').length
-  const failed = tasks.value.filter((task) => task.status === 'failed').length
-
-  return [
-    { label: '全部任务', value: tasks.value.length },
-    { label: '运行中', value: running },
-    { label: '已完成', value: completed },
-    { label: '失败', value: failed },
-  ]
-})
 
 async function openTask(id: string) {
   await router.push({ name: 'analysis-task-detail', params: { id } })

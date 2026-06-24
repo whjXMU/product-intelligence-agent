@@ -1,4 +1,4 @@
-import type { AppRouteRecord } from '../../app/router/types'
+import type { AppRouteRecord } from '../../router/types.ts'
 
 export default [
   {
