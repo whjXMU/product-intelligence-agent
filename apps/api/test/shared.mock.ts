@@ -16,3 +16,11 @@ export const createAnalysisTaskRequestSchema = z.object({
   sourceType: z.literal('manual'),
   input: analysisTaskInputSchema,
 });
+
+export const createAnalysisSessionRequestSchema = z.object({
+  initialPrompt: z.string().trim().min(1, 'initialPrompt is required'),
+});
+
+export const addAnalysisSessionMessageRequestSchema = z.object({
+  content: z.string().trim().min(1, 'content is required'),
+});

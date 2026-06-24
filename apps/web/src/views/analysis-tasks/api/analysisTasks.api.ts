@@ -1,8 +1,12 @@
 import type {
+  AddAnalysisSessionMessageRequest,
+  AnalysisSessionDto,
+  AnalysisSessionListItemDto,
   AnalysisTaskDto,
   AnalysisTaskListItemDto,
   AnalysisTaskRunDto,
   AnalysisTaskRunListItemDto,
+  CreateAnalysisSessionRequest,
   CreateAnalysisTaskRequest,
 } from '@product-intelligence-agent/shared'
 import { requestJson } from '../../../shared/api/http'
@@ -44,4 +48,35 @@ export function getAnalysisTaskRun(taskId: string, runId: string) {
 
 export function listAnalysisTaskRuns(taskId: string) {
   return requestJson<AnalysisTaskRunListItemDto[]>(`/analysis-tasks/${taskId}/runs`)
+}
+
+export function createAnalysisSession(request: CreateAnalysisSessionRequest) {
+  return requestJson<AnalysisSessionDto>('/analysis-sessions', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  })
+}
+
+export function listAnalysisSessions() {
+  return requestJson<AnalysisSessionListItemDto[]>('/analysis-sessions')
+}
+
+export function getAnalysisSession(id: string) {
+  return requestJson<AnalysisSessionDto>(`/analysis-sessions/${id}`)
+}
+
+export function addAnalysisSessionMessage(
+  id: string,
+  request: AddAnalysisSessionMessageRequest,
+) {
+  return requestJson<AnalysisSessionDto>(`/analysis-sessions/${id}/messages`, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  })
+}
+
+export function runAnalysisSession(id: string) {
+  return requestJson<AnalysisSessionDto>(`/analysis-sessions/${id}/run`, {
+    method: 'POST',
+  })
 }

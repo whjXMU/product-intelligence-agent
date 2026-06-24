@@ -8,6 +8,8 @@ export const ErrorCodes = {
   ANALYSIS_TASK_INPUT_INVALID: 'analysis_task.input_invalid',
   ANALYSIS_TASK_RUN_FAILED: 'analysis_task.run_failed',
   ANALYSIS_TASK_WORKFLOW_RUN_FAILED: 'analysis_task.workflow_run_failed',
+  ANALYSIS_SESSION_NOT_FOUND: 'analysis_session.not_found',
+  ANALYSIS_SESSION_ALREADY_RUNNING: 'analysis_session.already_running',
 } as const;
 
 export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];

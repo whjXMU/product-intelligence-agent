@@ -1,6 +1,7 @@
 import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import type { DataSourceOptions } from 'typeorm';
 import { getDatabaseConfig } from '../config/database.config';
+import { AnalysisSessionEntity } from '../modules/analysis-tasks/entities/analysis-session.entity';
 import { AnalysisTaskRunEntity } from '../modules/analysis-tasks/entities/analysis-task-run.entity';
 import { AnalysisTaskEntity } from '../modules/analysis-tasks/entities/analysis-task.entity';
 
@@ -21,7 +22,11 @@ export function getTypeOrmDataSourceOptions(): DataSourceOptions {
   return {
     type: 'postgres',
     ...getDatabaseConfig(),
-    entities: [AnalysisTaskEntity, AnalysisTaskRunEntity],
+    entities: [
+      AnalysisTaskEntity,
+      AnalysisTaskRunEntity,
+      AnalysisSessionEntity,
+    ],
     migrations: [migrationsGlob],
     synchronize: false,
     migrationsRun: false,

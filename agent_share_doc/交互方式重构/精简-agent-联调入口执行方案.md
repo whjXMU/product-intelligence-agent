@@ -264,3 +264,49 @@ shared DTO 作为前后端唯一契约
 实体字段预留 briefDraft / reportDraft / trace，但 UI 暂不复杂使用
 第一版 run 是可替换实现，后续替换为真实 Agent runner
 ```
+
+### 第 1 步完成记录
+
+已完成内容：
+
+```text
+新增 shared AnalysisSession DTO / schema
+新增后端 analysis-sessions controller / service / entity / mapper
+新增 analysis_sessions 建表 migration
+注册 AnalysisSessionEntity 到 TypeORM 和 Nest module
+新增前端 analysis-sessions API client
+补充 API service unit test 和 e2e 覆盖
+```
+
+当前可用接口：
+
+```text
+POST /analysis-sessions
+GET /analysis-sessions
+GET /analysis-sessions/:id
+POST /analysis-sessions/:id/messages
+POST /analysis-sessions/:id/run
+```
+
+当前 `run` 行为：
+
+```text
+先置为 running
+生成 placeholder assistant message
+写入 resultText 和 trace
+置为 completed
+```
+
+已验证：
+
+```text
+pnpm typecheck
+pnpm --filter @product-intelligence-agent/api test
+pnpm --filter @product-intelligence-agent/api test:e2e
+```
+
+下一步建议：
+
+```text
+第 2 步：新增 Agent Console 中间输入区，使用 analysis-sessions API 创建和运行联调 Session。
+```
