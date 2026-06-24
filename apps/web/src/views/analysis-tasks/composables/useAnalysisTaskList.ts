@@ -7,6 +7,7 @@ import {
   createAnalysisTask,
   listAnalysisTasks,
 } from '../api/analysisTasks.api'
+import { ApiError } from '../../../shared/api/http'
 import { formatUnknownError } from '../../../shared/utils/error'
 
 export function useAnalysisTaskList() {
@@ -14,15 +15,18 @@ export function useAnalysisTaskList() {
   const tasksLoading = ref(false)
   const creating = ref(false)
   const taskErrorMessage = ref('')
+  const taskError = ref<ApiError | null>(null)
 
   async function loadTasks() {
     tasksLoading.value = true
     taskErrorMessage.value = ''
+    taskError.value = null
 
     try {
       tasks.value = await listAnalysisTasks()
     } catch (error) {
       taskErrorMessage.value = formatUnknownError(error, '加载任务列表失败')
+      taskError.value = error instanceof ApiError ? error : null
     } finally {
       tasksLoading.value = false
     }
@@ -31,6 +35,7 @@ export function useAnalysisTaskList() {
   async function submitTask(request: CreateAnalysisTaskRequest) {
     creating.value = true
     taskErrorMessage.value = ''
+    taskError.value = null
 
     try {
       const task = await createAnalysisTask(request)
@@ -38,6 +43,7 @@ export function useAnalysisTaskList() {
       return task
     } catch (error) {
       taskErrorMessage.value = formatUnknownError(error, '创建任务失败')
+      taskError.value = error instanceof ApiError ? error : null
       return null
     } finally {
       creating.value = false
@@ -49,6 +55,7 @@ export function useAnalysisTaskList() {
     tasksLoading,
     creating,
     taskErrorMessage,
+    taskError,
     loadTasks,
     submitTask,
   }

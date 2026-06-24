@@ -5,12 +5,10 @@
         <p class="eyebrow">任务列表</p>
         <h2>{{ tasks.length }} 个任务</h2>
       </div>
-      <span v-if="loading" class="muted">加载中</span>
+      <el-tag v-if="loading" type="info">加载中</el-tag>
     </div>
 
-    <div v-if="tasks.length === 0 && !loading" class="empty-state">
-      还没有任务，先创建一个竞品分析任务。
-    </div>
+    <el-empty v-if="tasks.length === 0 && !loading" description="还没有任务" />
 
     <button
       v-for="task in tasks"
@@ -23,9 +21,9 @@
       <span class="task-title">{{ task.title }}</span>
       <span class="task-meta">{{ task.productName }} vs {{ task.competitorName }}</span>
       <span class="task-footer">
-        <span class="status-pill" :class="`status-${task.status}`">
+        <el-tag :type="getStatusTagType(task.status)" effect="light">
           {{ getTaskStatusText(task.status) }}
-        </span>
+        </el-tag>
         <span>{{ formatTaskDate(task.createdAt) }}</span>
       </span>
     </button>
@@ -33,7 +31,11 @@
 </template>
 
 <script setup lang="ts">
-import type { AnalysisTaskListItemDto } from '@product-intelligence-agent/shared'
+import { ElEmpty, ElTag } from 'element-plus'
+import type {
+  AnalysisTaskListItemDto,
+  AnalysisTaskStatus,
+} from '@product-intelligence-agent/shared'
 import { formatTaskDate, getTaskStatusText } from '../utils/analysisTaskDisplay'
 
 defineProps<{
@@ -45,6 +47,17 @@ defineProps<{
 const emit = defineEmits<{
   select: [id: string]
 }>()
+
+function getStatusTagType(status: AnalysisTaskStatus) {
+  const typeMap: Record<AnalysisTaskStatus, 'info' | 'primary' | 'success' | 'danger'> = {
+    created: 'info',
+    running: 'primary',
+    completed: 'success',
+    failed: 'danger',
+  }
+
+  return typeMap[status]
+}
 </script>
 
 <style scoped lang="scss">
@@ -98,37 +111,6 @@ const emit = defineEmits<{
   color: var(--color-muted);
   font-size: 13px;
   line-height: 1.5;
-}
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  border-radius: 999px;
-  padding: 0 9px;
-  color: var(--color-text-secondary);
-  background: #e9eef5;
-  font-weight: 800;
-}
-
-.status-created {
-  color: #5c4300;
-  background: #fff2c2;
-}
-
-.status-running {
-  color: #0b5870;
-  background: #d9f3fb;
-}
-
-.status-completed {
-  color: #12623b;
-  background: #dff7e8;
-}
-
-.status-failed {
-  color: #8a1f1f;
-  background: #ffe1e1;
 }
 
 @media (max-width: 900px) {
