@@ -8,7 +8,7 @@ async function bootstrap() {
   const appConfig = getAppConfig();
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: appConfig.webOrigin,
+    origin: appConfig.webOrigins,
   });
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ApiResponseInterceptor());

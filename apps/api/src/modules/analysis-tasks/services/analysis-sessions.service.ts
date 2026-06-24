@@ -137,6 +137,10 @@ export class AnalysisSessionsService {
     );
   }
 
+  async remove(id: string): Promise<void> {
+    await this.analysisSessionsRepository.delete({ id });
+  }
+
   private async findEntityById(id: string): Promise<AnalysisSessionEntity> {
     const session = await this.analysisSessionsRepository.findOne({
       where: { id },

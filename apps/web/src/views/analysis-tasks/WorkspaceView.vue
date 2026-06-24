@@ -34,15 +34,39 @@
     </template>
   </el-alert>
 
-  <section class="workspace" aria-label="竞品分析任务工作台">
-    <AnalysisTaskCreateForm :creating="creating" @create="createTask" />
-    <AnalysisTaskList
-      :tasks="tasks"
-      :selected-task-id="null"
-      :loading="tasksLoading"
-      @select="openTask"
-    />
-  </section>
+  <WorkspaceShell>
+    <template #sidebar>
+      <WorkspaceNav
+        :sessions="sessions"
+        :selected-session-id="selectedSessionId"
+        :sessions-loading="sessionsLoading || selectingSession"
+        :session-error="sessionErrorMessage"
+        :tasks="tasks"
+        :tasks-loading="tasksLoading"
+        @new-session="newSession"
+        @select-session="openSession"
+        @delete-session="deleteSession"
+        @select-task="openTask"
+      />
+    </template>
+
+    <template #main>
+      <AgentConsole
+        v-model:prompt="prompt"
+        :session="session"
+        :submitting="submitting"
+        :can-submit="canSubmit"
+        :error-message="agentErrorMessage"
+        :error="agentError"
+        @submit="submitAndRefresh"
+        @reset="resetConsole"
+      />
+    </template>
+
+    <template #aside>
+      <DebugPanel :session="session" :error-message="agentErrorMessage" />
+    </template>
+  </WorkspaceShell>
 
   <HealthStatusStrip
     :health="health"
@@ -56,28 +80,55 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElAlert, ElButton } from 'element-plus'
+import { ElAlert, ElButton, ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
-import type { CreateAnalysisTaskRequest } from '@product-intelligence-agent/shared'
 import HealthStatusStrip from '../../shared/system/components/HealthStatusStrip.vue'
 import { useHealthCheck } from '../../shared/system/composables/useHealthCheck'
-import AnalysisTaskCreateForm from './components/AnalysisTaskCreateForm.vue'
-import AnalysisTaskList from './components/AnalysisTaskList.vue'
+import AgentConsole from './components/AgentConsole.vue'
+import DebugPanel from './components/DebugPanel.vue'
+import WorkspaceNav from './components/WorkspaceNav.vue'
+import WorkspaceShell from './components/WorkspaceShell.vue'
+import { useAgentConsole } from './composables/useAgentConsole'
 import { useAnalysisTaskList } from './composables/useAnalysisTaskList'
+import { useSessionList } from './composables/useSessionList'
 
 const router = useRouter()
 
 const {
   tasks,
   tasksLoading,
-  creating,
   taskErrorMessage,
   taskError,
   loadTasks,
-  submitTask,
 } = useAnalysisTaskList()
 
 const { health, healthLoading, healthErrorMessage, databaseStatusText, loadHealth } = useHealthCheck()
+
+const {
+  prompt,
+  activeSession: session,
+  submitting,
+  canSubmit,
+  errorMessage: agentErrorMessage,
+  error: agentError,
+  submitPrompt,
+  setSession,
+  clearSession,
+  reset: resetConsole,
+} = useAgentConsole()
+
+const {
+  sessions,
+  selectedSessionId,
+  loading: sessionsLoading,
+  selecting: selectingSession,
+  errorMessage: sessionErrorMessage,
+  loadSessions,
+  selectSession,
+  selectLocalSession,
+  clearSelection,
+  removeSession,
+} = useSessionList()
 
 const taskStats = computed(() => {
   const running = tasks.value.filter((task) => task.status === 'running').length
@@ -92,20 +143,50 @@ const taskStats = computed(() => {
   ]
 })
 
-async function createTask(request: CreateAnalysisTaskRequest) {
-  const task = await submitTask(request)
-  if (task) {
-    await router.push({ name: 'analysis-task-detail', params: { id: task.id } })
+async function openTask(id: string) {
+  await router.push({ name: 'analysis-task-detail', params: { id } })
+}
+
+async function openSession(id: string) {
+  const selected = await selectSession(id)
+
+  if (selected) {
+    setSession(selected)
   }
 }
 
-async function openTask(id: string) {
-  await router.push({ name: 'analysis-task-detail', params: { id } })
+async function submitAndRefresh() {
+  const session = await submitPrompt()
+
+  if (session) {
+    selectLocalSession(session)
+    await loadSessions()
+  }
+}
+
+function newSession() {
+  clearSelection()
+  resetConsole()
+}
+
+async function deleteSession(id: string) {
+  const isActive = selectedSessionId.value === id
+  const deleted = await removeSession(id)
+
+  if (!deleted) {
+    ElMessage.error('删除 Session 失败')
+    return
+  }
+
+  if (isActive) {
+    clearSession()
+  }
 }
 
 onMounted(() => {
   void loadHealth()
   void loadTasks()
+  void loadSessions()
 })
 </script>
 
@@ -167,13 +248,6 @@ onMounted(() => {
   font-size: 13px;
 }
 
-.workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.85fr);
-  gap: 18px;
-  margin-top: 22px;
-}
-
 @media (max-width: 900px) {
   .workspace-header {
     align-items: stretch;
@@ -184,8 +258,5 @@ onMounted(() => {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .workspace {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

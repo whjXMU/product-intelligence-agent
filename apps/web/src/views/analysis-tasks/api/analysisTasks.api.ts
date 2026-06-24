@@ -80,3 +80,9 @@ export function runAnalysisSession(id: string) {
     method: 'POST',
   })
 }
+
+export function deleteAnalysisSession(id: string) {
+  return requestJson<null>(`/analysis-sessions/${id}`, {
+    method: 'DELETE',
+  })
+}

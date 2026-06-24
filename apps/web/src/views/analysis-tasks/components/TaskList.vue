@@ -21,7 +21,7 @@
       <span class="task-title">{{ task.title }}</span>
       <span class="task-meta">{{ task.productName }} vs {{ task.competitorName }}</span>
       <span class="task-footer">
-        <el-tag :type="getStatusTagType(task.status)" effect="light">
+        <el-tag :type="getTaskStatusTagType(task.status)" effect="light">
           {{ getTaskStatusText(task.status) }}
         </el-tag>
         <span>{{ formatTaskDate(task.createdAt) }}</span>
@@ -32,11 +32,12 @@
 
 <script setup lang="ts">
 import { ElEmpty, ElTag } from 'element-plus'
-import type {
-  AnalysisTaskListItemDto,
-  AnalysisTaskStatus,
-} from '@product-intelligence-agent/shared'
-import { formatTaskDate, getTaskStatusText } from '../utils/analysisTaskDisplay'
+import type { AnalysisTaskListItemDto } from '@product-intelligence-agent/shared'
+import {
+  formatTaskDate,
+  getTaskStatusTagType,
+  getTaskStatusText,
+} from '../utils/analysisTaskDisplay'
 
 defineProps<{
   tasks: AnalysisTaskListItemDto[]
@@ -47,17 +48,6 @@ defineProps<{
 const emit = defineEmits<{
   select: [id: string]
 }>()
-
-function getStatusTagType(status: AnalysisTaskStatus) {
-  const typeMap: Record<AnalysisTaskStatus, 'info' | 'primary' | 'success' | 'danger'> = {
-    created: 'info',
-    running: 'primary',
-    completed: 'success',
-    failed: 'danger',
-  }
-
-  return typeMap[status]
-}
 </script>
 
 <style scoped lang="scss">

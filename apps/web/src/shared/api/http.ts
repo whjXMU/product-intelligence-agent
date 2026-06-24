@@ -1,7 +1,6 @@
 import type {
   ApiErrorResponse,
   ApiResponse,
-  ApiSuccessResponse,
 } from '@product-intelligence-agent/shared'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
@@ -31,18 +30,18 @@ export class ApiError extends Error {
   }
 }
 
-export async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+export async function requestJson<T>(path: string, conifg?: RequestInit): Promise<T> {
   const response = await fetch(`${apiBaseUrl}${path}`, {
-    ...init,
+    ...conifg,
     headers: {
       'Content-Type': 'application/json',
-      ...init?.headers,
+      ...conifg?.headers,
     },
   })
 
   const body = (await response.json()) as unknown
 
-  if (!isApiResponse<T>(body)) {
+  if (!isApiEnvelope(body)) {
     throw new ApiError({
       code: 'core.invalid_response',
       message: `Invalid API response for ${path}`,
@@ -51,7 +50,7 @@ export async function requestJson<T>(path: string, init?: RequestInit): Promise<
     })
   }
 
-  if (!response.ok || !isApiSuccessResponse<T>(body)) {
+  if (body.code !== 'core.ok') {
     const errorBody = body as ApiErrorResponse
     throw new ApiError({
       code: errorBody.code,
@@ -63,10 +62,20 @@ export async function requestJson<T>(path: string, init?: RequestInit): Promise<
     })
   }
 
-  return body.data
+  if (!response.ok) {
+    throw new ApiError({
+      code: 'core.http_error',
+      message: `Unexpected HTTP status ${response.status} for ${path}`,
+      status: response.status,
+      requestId: body.meta.requestId,
+      traceId: body.meta.traceId,
+    })
+  }
+
+  return ('data' in body ? body.data : null) as T
 }
 
-function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
+function isApiEnvelope(value: unknown): value is Pick<ApiResponse<unknown>, 'code' | 'message' | 'meta'> {
   if (typeof value !== 'object' || value === null) return false
   if (!('code' in value) || typeof value.code !== 'string') return false
   if (!('message' in value) || typeof value.message !== 'string') return false
@@ -77,11 +86,6 @@ function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
     typeof meta.requestId === 'string' &&
     typeof meta.traceId === 'string' &&
     typeof meta.timestamp === 'string' &&
-    typeof meta.path === 'string' &&
-    'data' in value
+    typeof meta.path === 'string'
   )
-}
-
-function isApiSuccessResponse<T>(value: ApiResponse<T>): value is ApiSuccessResponse<T> {
-  return value.code === 'core.ok'
 }

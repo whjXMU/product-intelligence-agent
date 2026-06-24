@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -57,5 +58,11 @@ export class AnalysisSessionsController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<AnalysisSessionDto> {
     return this.analysisSessionsService.run(id);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id', new ParseUUIDPipe()) id: string): Promise<null> {
+    await this.analysisSessionsService.remove(id);
+    return null;
   }
 }

@@ -1,5 +1,6 @@
 import type {
   AgentTraceV1,
+  AnalysisSessionDto,
   AnalysisTaskDto,
   AnalysisTaskListItemDto,
   AnalysisTaskMockResult,
@@ -21,6 +22,49 @@ export function getTaskStatusText(status: AnalysisTaskListItemDto['status']) {
   }
 
   return statusMap[status]
+}
+
+export function getTaskStatusTagType(status: AnalysisTaskListItemDto['status']) {
+  const typeMap: Record<
+    AnalysisTaskListItemDto['status'],
+    'info' | 'primary' | 'success' | 'danger'
+  > = {
+    created: 'info',
+    running: 'primary',
+    completed: 'success',
+    failed: 'danger',
+  }
+
+  return typeMap[status]
+}
+
+export function getSessionStatusText(status: AnalysisSessionDto['status']) {
+  const statusMap: Record<AnalysisSessionDto['status'], string> = {
+    drafting: '讨论中',
+    brief_ready: 'Brief 待确认',
+    ready_to_run: '待执行',
+    running: '运行中',
+    completed: '已完成',
+    failed: '失败',
+  }
+
+  return statusMap[status]
+}
+
+export function getSessionStatusTagType(status: AnalysisSessionDto['status']) {
+  const typeMap: Record<
+    AnalysisSessionDto['status'],
+    'info' | 'warning' | 'success' | 'danger'
+  > = {
+    drafting: 'info',
+    brief_ready: 'warning',
+    ready_to_run: 'warning',
+    running: 'warning',
+    completed: 'success',
+    failed: 'danger',
+  }
+
+  return typeMap[status]
 }
 
 export function isMockResult(value: AnalysisTaskDto['result']): value is AnalysisTaskMockResult {

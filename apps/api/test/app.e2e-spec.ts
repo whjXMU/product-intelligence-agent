@@ -118,6 +118,7 @@ interface MockAnalysisSessionsService {
     [string, AddAnalysisSessionMessageRequest]
   >;
   run: jest.Mock<Promise<AnalysisSessionDto>, [string]>;
+  remove: jest.Mock<Promise<void>, [string]>;
 }
 
 describe('AnalysisTasksController (e2e)', () => {
@@ -194,6 +195,10 @@ describe('AnalysisTasksController (e2e)', () => {
           resultText: 'Agent 联调入口已收到你的分析需求。',
           trace: [{ name: 'placeholder_agent_run', status: 'completed' }],
         });
+      }),
+      remove: jest.fn((id: string) => {
+        void id;
+        return Promise.resolve();
       }),
     };
 
@@ -337,5 +342,13 @@ describe('AnalysisTasksController (e2e)', () => {
       }),
     );
     expect(analysisSessionsService.run).toHaveBeenCalledWith(sessionId);
+  });
+
+  it('deletes an analysis session', async () => {
+    await request(app.getHttpServer())
+      .delete(`/analysis-sessions/${sessionId}`)
+      .expect(200);
+
+    expect(analysisSessionsService.remove).toHaveBeenCalledWith(sessionId);
   });
 });

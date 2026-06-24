@@ -9,6 +9,7 @@ interface MockAnalysisSessionRepository {
   save: jest.Mock<Promise<AnalysisSessionEntity>, [Partial<AnalysisSessionEntity>]>;
   find: jest.Mock<Promise<AnalysisSessionEntity[]>, [unknown?]>;
   findOne: jest.Mock<Promise<AnalysisSessionEntity | null>, [unknown?]>;
+  delete: jest.Mock<Promise<unknown>, [unknown]>;
 }
 
 const baseSession = (
@@ -54,6 +55,10 @@ describe('AnalysisSessionsService', () => {
       ),
       find: jest.fn(() => Promise.resolve([baseSession()])),
       findOne: jest.fn(() => Promise.resolve(baseSession())),
+      delete: jest.fn((criteria: unknown) => {
+        void criteria;
+        return Promise.resolve({ affected: 1 });
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -148,5 +153,11 @@ describe('AnalysisSessionsService', () => {
     await expect(service.findOne('missing-session')).rejects.toBeInstanceOf(
       NotFoundException,
     );
+  });
+
+  it('deletes an existing session', async () => {
+    await expect(service.remove('session-1')).resolves.toBeUndefined();
+
+    expect(repository.delete).toHaveBeenCalledWith({ id: 'session-1' });
   });
 });

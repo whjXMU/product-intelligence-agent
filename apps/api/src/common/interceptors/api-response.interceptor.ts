@@ -25,7 +25,7 @@ export class ApiResponseInterceptor implements NestInterceptor {
         return {
           code: ErrorCodes.CORE_OK,
           message: 'OK',
-          data,
+          data: data ?? null,
           meta: {
             requestId,
             traceId,
